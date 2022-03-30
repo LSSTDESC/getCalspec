@@ -16,7 +16,7 @@ def add_astroquery_id(df):
         if simbad is None and "NGC6681" in row["Star name"]:
             simbad = Simbad.query_object("NGC6681")
         if simbad is not None:
-            names.append(simbad["MAIN_ID"][0])
+            names.append(simbad["MAIN_ID"][0].upper())
         else:
             names.append('')
     df["Astroquery Name"] = names

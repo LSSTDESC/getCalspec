@@ -1,10 +1,12 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 import os
 from urllib import request
-from astropy.io import fits
 from astropy import units as u
 from astropy.table import Table
+from astroquery.simbad import Simbad
+
 
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
 
@@ -26,7 +28,6 @@ class Calspec:
 
         Examples
         --------
-        >>> from astroquery.simbad import Simbad
         >>> simbad = Simbad.query_object("eta1 dor")
         >>> c = Calspec(simbad["MAIN_ID"][0])
         >>> print(c)   #doctest: +ELLIPSIS
@@ -47,6 +48,23 @@ class Calspec:
     def __str__(self):
         return self.query.to_string()
 
+    def get_spectrum_fits(self, output_directory="./calspec"):
+        """
+        Examples
+        --------
+        >>> c = Calspec("eta1 dor")
+        >>> c.get_spectrum_fits(output_directory="./calspec")
+        './calspec/eta1dor_stis_002.fits'
+
+        """
+        if not os.path.isdir(output_directory):
+            os.mkdir(output_directory)
+        spectrum_file_name = self.Name+self.STIS+".fits"
+        output_file_name = os.path.join(output_directory, spectrum_file_name)
+        if not os.path.isfile(output_file_name):
+            request.urlretrieve(CALSPEC_ARCHIVE+spectrum_file_name, output_file_name)
+        return output_file_name
+
     def get_spectrum_table(self, output_directory="./calspec"):
         """
 
@@ -58,22 +76,17 @@ class Calspec:
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> t = c.get_spectrum_table()
+        >>> t = c.get_spectrum_table(output_directory="./calspec")
         >>> print(t)   #doctest: +ELLIPSIS
         WAVELENGTH...
         ANGSTROMS...
 
         """
-        if not os.path.isdir(output_directory):
-            os.mkdir(output_directory)
-        spectrum_file_name = str(self.Name+self.STIS+".fits")
-        output_file_name = os.path.join(output_directory, spectrum_file_name)
-        if not os.path.isfile(output_file_name):
-            request.urlretrieve(CALSPEC_ARCHIVE+spectrum_file_name, output_file_name)
+        output_file_name = self.get_spectrum_fits(output_directory=output_directory)
         t = Table.read(output_file_name)
         return t
 
-    def get_spectrum_numpy(self):
+    def get_spectrum_numpy(self, output_directory="./calspec"):
         """Make a dictionnary of numpy arrays with astropy units from Calspec FITS file.
 
         Returns
@@ -89,7 +102,7 @@ class Calspec:
         {'WAVELENGTH': <Quantity [...
 
         """
-        t = self.get_spectrum_table()
+        t = self.get_spectrum_table(output_directory=output_directory)
         d = {}
         for k in range(0, 4):
             d[t.colnames[k]] = np.copy(t[t.colnames[k]][:])
@@ -99,12 +112,25 @@ class Calspec:
                 d[t.colnames[k]] *= u.erg / u.second / u.cm**2 / u.angstrom
         return d
 
+    def plot_spectrum(self, xscale="log", yscale="log", output_directory="./calspec"):
+        """Plot Calspec spectrum.
 
+        Examples
+        --------
+        >>> c = Calspec("eta1 dor")
+        >>> c.plot_spectrum()
 
-
-
-
-
+        """
+        t = self.get_spectrum_numpy(output_directory=output_directory)
+        fig = plt.figure()
+        plt.errorbar(t["WAVELENGTH"].value, t["FLUX"].value, yerr=t["STATERROR"].value)
+        plt.grid()
+        plt.yscale(yscale)
+        plt.xscale(xscale)
+        plt.title(self.label)
+        plt.xlabel(rf"$\lambda$ [{t['WAVELENGTH'].unit}]")
+        plt.ylabel(rf"Flux [{t['FLUX'].unit}]")
+        plt.show()
 
 
 if __name__ == "__main__":
