@@ -40,6 +40,7 @@ def clean_table(df):
             df.rename(columns={col: col.replace(" ", "_")}, inplace=True)
     df.set_index("Star_name", inplace=True)
     df.drop(index="[1]", inplace=True)
+    df.reset_index(drop=False, inplace=True)
 
 
 
