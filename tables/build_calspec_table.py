@@ -23,6 +23,8 @@ for line in lines:
         continue
     filenames.append(line.split('"')[1])
 
+print(urllib.request.urlopen("https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html").read())
+
 # we need the spectral type and proper motion information
 try:
     Simbad.add_votable_fields('pm')
