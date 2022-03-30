@@ -22,6 +22,29 @@ def add_astroquery_id(df):
     df["Astroquery Name"] = names
 
 
+def clean_table(df):
+    for col in df.columns:
+        if "*" in col:
+            df.rename(columns={col: col.replace("*", "")}, inplace=True)
+    for col in df.columns:
+        if "mas/yr" in col:
+            df.rename(columns={col: col.replace(" (mas/yr)", "")}, inplace=True)
+    for col in df.columns:
+        if "." in col:
+            df.rename(columns={col: col.replace(".", "")}, inplace=True)
+    for col in df.columns:
+        if "-" in col:
+            df.rename(columns={col: col.replace("-", "_")}, inplace=True)
+    for col in df.columns:
+        if " " in col:
+            df.rename(columns={col: col.replace(" ", "_")}, inplace=True)
+    df.set_index("Star_name", inplace=True)
+    df.drop(index="[1]", inplace=True)
+
+
+
+
+
 tables = pd.read_html(CALSPEC_URL)
 for table in tables:
     if isinstance(table.columns, pd.MultiIndex):
@@ -37,6 +60,7 @@ if len(tables) > 1:
     df = pd.merge(df, tables[2], on="Star name", how='left')
 
 add_astroquery_id(df)
+clean_table(df)
 
 df.to_csv('calspec.csv')
 df.to_pickle('calspec.pkl')
