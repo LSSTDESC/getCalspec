@@ -1,9 +1,6 @@
-import numpy as np
 from astroquery.simbad import Simbad
-from astropy.coordinates import SkyCoord
-from astropy import units as u
 import pandas as pd
-import urllib
+
 
 CALSPEC_URL = "https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html"
 
