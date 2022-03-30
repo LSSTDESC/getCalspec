@@ -12,3 +12,5 @@ c.get_spectrum_table()  # download and return an Astropy table
 c.get_spectrum_numpy()  # download and return a dictionnary of numpy arrays with units
 c.plot_spectrum()  # download and plot the spectrum
 ```
+
+The script `tables/extract_calspec_tables_from_web.py` update the calspec tables, reading the STSC webpage.
