@@ -17,8 +17,10 @@ for table in tables:
         table = table.drop(index=r"[1]")
 
 df = tables[0]
+print(df.columns)
 if len(tables) > 1:
-    df.append(tables[1])
+    print(tables[1])
+    df = df.append(tables[1])
     df = pd.merge(df, tables[2], on="Star name", how='left')
 df.to_csv('calspec.csv')
 df.to_pickle('calspec.pkl')
