@@ -6,6 +6,7 @@ to download spectrum FITS files from STSC archive https://www.stsci.edu/hst/inst
 
 Example
 ```
+test = is_calspec("eta1 dor")
 c = Calspec("eta1 dor")
 c.get_spectrum_fits()  # download the fits file
 c.get_spectrum_table()  # download and return an Astropy table

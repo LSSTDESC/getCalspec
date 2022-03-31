@@ -11,6 +11,31 @@ from astroquery.simbad import Simbad
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
 
 
+def is_calspec(star_label):
+    """Test if a star name corresponds to a Calspec entry in the tables.
+
+    Parameters
+    ----------
+    star_label: str
+        The star name.
+
+    Returns
+    -------
+    is_calspec: bool
+        True is star name is in Calspec table.
+
+    Examples
+    --------
+    >>> is_calspec("eta1 dor")
+    True
+    >>> is_calspec("eta dor")
+    False
+    """
+    label = star_label.upper()
+    df = pd.read_pickle("../tables/calspec.pkl")
+    return np.any((df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label))
+
+
 class Calspec:
     """ The Calspec class contains all properties from a Calspec star read from
     https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html
@@ -33,8 +58,15 @@ class Calspec:
         >>> print(c)   #doctest: +ELLIPSIS
            Star_name...
         ...  ETA1 DOR...
+        >>> c = Calspec("eta dor")   #doctest: +ELLIPSIS
+        Traceback (most recent call last):
+        ...
+        KeyError: 'ETA DOR not found in Calspec tables.'
         """
         self.label = calspec_label.upper()
+        test = is_calspec(self.label)
+        if not test:
+            raise KeyError(f"{self.label} not found in Calspec tables.")
         df = pd.read_pickle("../tables/calspec.pkl")
         row = df[(df["Astroquery_Name"] == self.label) | (df["Simbad_Name"] == self.label) | (df["Star_name"] == self.label)]
         self.query = row
