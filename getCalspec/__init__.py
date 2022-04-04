@@ -11,6 +11,32 @@ from astroquery.simbad import Simbad
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
 
 
+def get_calspec_keys(star_label):
+    """Return the DataFrame keys if a star name corresponds to a Calspec entry in the tables.
+
+    Parameters
+    ----------
+    star_label: str
+        The star name.
+
+    Returns
+    -------
+    keys: array_like
+        The DataFrame keys corresponding to the star name.
+
+    Examples
+    --------
+    >>> get_calspec_keys("eta1 dor")   #doctest: +ELLIPSIS
+    0      False
+    1      False
+    ...
+    """
+    label = star_label.upper()
+    df = pd.read_pickle("../tables/calspec.pkl")
+    return (df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label) \
+           | (df["Alt_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
+
+
 def is_calspec(star_label):
     """Test if a star name corresponds to a Calspec entry in the tables.
 
@@ -29,11 +55,9 @@ def is_calspec(star_label):
     >>> is_calspec("eta1 dor")
     True
     >>> is_calspec("eta dor")
-    False
+    True
     """
-    label = star_label.upper()
-    df = pd.read_pickle("../tables/calspec.pkl")
-    return np.any((df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label))
+    return np.any(get_calspec_keys(star_label.upper()))
 
 
 class Calspec:
@@ -58,17 +82,24 @@ class Calspec:
         >>> print(c)   #doctest: +ELLIPSIS
            Star_name...
         ...  ETA1 DOR...
-        >>> c = Calspec("eta dor")   #doctest: +ELLIPSIS
+        >>> c = Calspec("etta dor")   #doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
-        KeyError: 'ETA DOR not found in Calspec tables.'
+        KeyError: 'ETTA DOR not found in Calspec tables.'
+        >>> c = Calspec("mu col")
+        >>> simbad = Simbad.query_object("mu col")
+        >>> print(simbad)
+        >>> c = Calspec(simbad["MAIN_ID"][0])
+        >>> print(c)   #doctest: +ELLIPSIS
+           Star_name...
+        ...  MU COL...
         """
         self.label = calspec_label.upper()
         test = is_calspec(self.label)
         if not test:
             raise KeyError(f"{self.label} not found in Calspec tables.")
         df = pd.read_pickle("../tables/calspec.pkl")
-        row = df[(df["Astroquery_Name"] == self.label) | (df["Simbad_Name"] == self.label) | (df["Star_name"] == self.label)]
+        row = df[get_calspec_keys(self.label)]
         self.query = row
         for col in row.columns:
             setattr(self, col, row[col].values[0])
