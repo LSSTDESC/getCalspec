@@ -5,7 +5,6 @@ import os
 from urllib import request
 from astropy import units as u
 from astropy.table import Table
-from astroquery.simbad import Simbad  # noqa: F401 used in numpydoc tests
 
 
 __all__ = ['get_calspec_keys',
@@ -99,8 +98,7 @@ class Calspec:
 
         Examples
         --------
-        >>> simbad = Simbad.query_object("eta1 dor")
-        >>> c = Calspec(simbad["MAIN_ID"][0])
+        >>> c = Calspec("* eta01 Dor")
         >>> print(c)   #doctest: +ELLIPSIS
            Star_name...
         ...  ETA1 DOR...
@@ -109,9 +107,7 @@ class Calspec:
         ...
         KeyError: 'ETTA DOR not found in Calspec tables.'
         >>> c = Calspec("mu col")
-        >>> simbad = Simbad.query_object("mu col")
-        >>> print(simbad)
-        >>> c = Calspec(simbad["MAIN_ID"][0])
+        >>> c = Calspec("* mu. Col")
         >>> print(c)   #doctest: +ELLIPSIS
            Star_name...
         ...  MU COL...
