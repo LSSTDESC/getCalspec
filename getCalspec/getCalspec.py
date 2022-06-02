@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 from urllib import request
+from urllib.error import HTTPError
 from astropy import units as u
 from astropy.table import Table
 
@@ -119,7 +120,7 @@ class Calspec:
         df = _getCalspecDataFrame()
         row = df[get_calspec_keys(self.label)]
         self.query = row
-        for col in row.columns:
+        for col in row.columns:  # sets .STIS and .Name attributes
             setattr(self, col, row[col].values[0])
         self.wavelength = None
         self.flux = None
@@ -127,7 +128,7 @@ class Calspec:
         self.syst = None
 
     def __str__(self):
-        return self.query.to_string()
+        return self.Name
 
     def get_spectrum_fits_filename(self, output_directory=None):
         """
@@ -144,10 +145,14 @@ class Calspec:
         if not os.path.isdir(output_directory):
             os.mkdir(output_directory)
 
-        spectrum_file_name = self.Name+self.STIS+".fits"
+        spectrum_file_name = self.Name + self.STIS + ".fits"
         output_file_name = os.path.join(output_directory, spectrum_file_name)
         if not os.path.isfile(output_file_name):
-            request.urlretrieve(CALSPEC_ARCHIVE+spectrum_file_name, output_file_name)
+            url = CALSPEC_ARCHIVE+spectrum_file_name
+            try:
+                request.urlretrieve(url, output_file_name)
+            except HTTPError as e:
+                raise RuntimeError(f"Failed to get data for {self.Name} from {url}") from e
         return output_file_name
 
     def get_spectrum_table(self, output_directory=None):
