@@ -33,7 +33,8 @@ def _getPackageDir():
 
 
 def get_calspec_keys(star_label):
-    """Return the DataFrame keys if a star name corresponds to a Calspec entry in the tables.
+    """Return the DataFrame keys if a star name corresponds to a Calspec entry
+    in the tables.
 
     Parameters
     ----------
@@ -175,12 +176,13 @@ class Calspec:
         return t
 
     def get_spectrum_numpy(self, output_directory=None):
-        """Make a dictionnary of numpy arrays with astropy units from Calspec FITS file.
+        """Make a dictionary of numpy arrays with astropy units from Calspec
+        FITS file.
 
         Returns
         -------
         table: dict
-            A dictionnary with the FITS table columns and thier astropy units.
+            A dictionary with the FITS table columns and their astropy units.
 
         Examples
         --------
