@@ -31,6 +31,7 @@ def add_alt_star_name(df):
         if row["Star name"] == "ETA1 DOR":
             df.at[i, "Alt Star name"] = "ETA DOR"
 
+
 def clean_table(df):
     for col in df.columns:
         if "*" in col:
@@ -50,9 +51,6 @@ def clean_table(df):
     df.set_index("Star_name", inplace=True)
     df.drop(index="[1]", inplace=True)
     df.reset_index(drop=False, inplace=True)
-
-
-
 
 
 tables = pd.read_html(CALSPEC_URL)
@@ -75,5 +73,3 @@ clean_table(df)
 
 df.to_csv('calspec.csv')
 df.to_pickle('calspec.pkl')
-
-
