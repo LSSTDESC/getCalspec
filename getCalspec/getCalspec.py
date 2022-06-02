@@ -8,6 +8,12 @@ from astropy.table import Table
 from astroquery.simbad import Simbad
 
 
+__all__ = ['get_calspec_keys',
+           'is_calspec',
+           'Calspec',
+           ]
+
+
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
 
 
