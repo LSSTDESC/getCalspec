@@ -16,6 +16,12 @@ class GetCalspecTestCase(unittest.TestCase):
         table = c.get_spectrum_table()
         self.assertIsInstance(table, astropyTable)
 
+        data = c.get_spectrum_numpy()
+        self.assertIsInstance(data, dict)
+        expectedKeys = ['WAVELENGTH', 'FLUX', 'STATERROR', 'SYSERROR']
+        for key in expectedKeys:
+            self.assertIn(key, data.keys())
+
 
 if __name__ == "__main__":
     unittest.main()
