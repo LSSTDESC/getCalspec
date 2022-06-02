@@ -17,7 +17,7 @@ __all__ = ['get_calspec_keys',
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
 
 
-def _getCalspecDataFrame():
+def getCalspecDataFrame():
     dirname = _getPackageDir()
     filename = os.path.join(dirname, "../tables/calspec.pkl")
     df = pd.read_pickle(filename)
@@ -54,7 +54,7 @@ def get_calspec_keys(star_label):
     ...
     """
     label = star_label.upper()
-    df = _getCalspecDataFrame()
+    df = getCalspecDataFrame()
     return (df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label) \
         | (df["Alt_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
 
@@ -117,7 +117,7 @@ class Calspec:
         test = is_calspec(self.label)
         if not test:
             raise KeyError(f"{self.label} not found in Calspec tables.")
-        df = _getCalspecDataFrame()
+        df = getCalspecDataFrame()
         row = df[get_calspec_keys(self.label)]
         self.query = row
         for col in row.columns:  # sets .STIS and .Name attributes
