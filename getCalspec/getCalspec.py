@@ -130,6 +130,15 @@ class Calspec:
     def __str__(self):
         return self.Name
 
+    def _santiseName(self, name):
+        """Special casing for cleaning up names in the table for use in
+        downloading.
+        """
+        name = name.lower()
+        if name == 'sdss151421':
+            name = 'sdssj151421'
+        return name
+
     def get_spectrum_fits_filename(self, output_directory=None):
         """
         Examples
@@ -145,7 +154,7 @@ class Calspec:
         if not os.path.isdir(output_directory):
             os.mkdir(output_directory)
 
-        spectrum_file_name = self.Name + self.STIS + ".fits"
+        spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
         output_file_name = os.path.join(output_directory, spectrum_file_name)
         if not os.path.isfile(output_file_name):
             url = CALSPEC_ARCHIVE+spectrum_file_name
