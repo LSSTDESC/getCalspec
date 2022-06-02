@@ -19,7 +19,7 @@ CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/curre
 
 def getCalspecDataFrame():
     dirname = _getPackageDir()
-    filename = os.path.join(dirname, "../tables/calspec.pkl")
+    filename = os.path.join(dirname, "../calspec_data/calspec.pkl")
     df = pd.read_pickle(filename)
     return df
 
