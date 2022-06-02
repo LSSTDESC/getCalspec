@@ -11,6 +11,21 @@ from astroquery.simbad import Simbad
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
 
 
+def _getCalspecDataFrame():
+    dirname = _getPackageDir()
+    filename = os.path.join(dirname, "../tables/calspec.pkl")
+    df = pd.read_pickle(filename)
+    return df
+
+
+def _getPackageDir():
+    """This method must live in the top level of this package, so if this
+    moves to a utils file then the returned path will need to account for that.
+    """
+    dirname = os.path.dirname(__file__)
+    return dirname
+
+
 def get_calspec_keys(star_label):
     """Return the DataFrame keys if a star name corresponds to a Calspec entry in the tables.
 
@@ -32,7 +47,7 @@ def get_calspec_keys(star_label):
     ...
     """
     label = star_label.upper()
-    df = pd.read_pickle("../tables/calspec.pkl")
+    df = _getCalspecDataFrame()
     return (df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label) \
            | (df["Alt_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
 
@@ -98,7 +113,7 @@ class Calspec:
         test = is_calspec(self.label)
         if not test:
             raise KeyError(f"{self.label} not found in Calspec tables.")
-        df = pd.read_pickle("../tables/calspec.pkl")
+        df = _getCalspecDataFrame()
         row = df[get_calspec_keys(self.label)]
         self.query = row
         for col in row.columns:
