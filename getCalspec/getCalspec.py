@@ -5,7 +5,7 @@ import os
 from urllib import request
 from astropy import units as u
 from astropy.table import Table
-from astroquery.simbad import Simbad
+from astroquery.simbad import Simbad  # noqa: F401 used in numpydoc tests
 
 
 __all__ = ['get_calspec_keys',
@@ -55,7 +55,7 @@ def get_calspec_keys(star_label):
     label = star_label.upper()
     df = _getCalspecDataFrame()
     return (df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label) \
-           | (df["Alt_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
+        | (df["Alt_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
 
 
 def is_calspec(star_label):
@@ -206,7 +206,7 @@ class Calspec:
 
         """
         t = self.get_spectrum_numpy(output_directory=output_directory)
-        fig = plt.figure()
+        _ = plt.figure()
         plt.errorbar(t["WAVELENGTH"].value, t["FLUX"].value, yerr=t["STATERROR"].value)
         plt.grid()
         plt.yscale(yscale)
