@@ -132,24 +132,28 @@ class Calspec:
     def __str__(self):
         return self.query.to_string()
 
-    def get_spectrum_fits(self, output_directory="./calspec"):
+    def get_spectrum_fits_filename(self, output_directory=None):
         """
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> c.get_spectrum_fits(output_directory="./calspec")
+        >>> c.get_spectrum_fits_filename(output_directory="./calspec")
         './calspec/eta1dor_stis_002.fits'
 
         """
+        if not output_directory:
+            output_directory = os.path.join(_getPackageDir(), "../calspec_data")
+
         if not os.path.isdir(output_directory):
             os.mkdir(output_directory)
+
         spectrum_file_name = self.Name+self.STIS+".fits"
         output_file_name = os.path.join(output_directory, spectrum_file_name)
         if not os.path.isfile(output_file_name):
             request.urlretrieve(CALSPEC_ARCHIVE+spectrum_file_name, output_file_name)
         return output_file_name
 
-    def get_spectrum_table(self, output_directory="./calspec"):
+    def get_spectrum_table(self, output_directory=None):
         """
 
         Returns
@@ -166,11 +170,11 @@ class Calspec:
         ANGSTROMS...
 
         """
-        output_file_name = self.get_spectrum_fits(output_directory=output_directory)
+        output_file_name = self.get_spectrum_fits_filename(output_directory=output_directory)
         t = Table.read(output_file_name)
         return t
 
-    def get_spectrum_numpy(self, output_directory="./calspec"):
+    def get_spectrum_numpy(self, output_directory=None):
         """Make a dictionnary of numpy arrays with astropy units from Calspec FITS file.
 
         Returns
@@ -196,7 +200,7 @@ class Calspec:
                 d[t.colnames[k]] *= u.erg / u.second / u.cm**2 / u.angstrom
         return d
 
-    def plot_spectrum(self, xscale="log", yscale="log", output_directory="./calspec"):
+    def plot_spectrum(self, xscale="log", yscale="log", output_directory=None):
         """Plot Calspec spectrum.
 
         Examples
