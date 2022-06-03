@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 from urllib import request
+from urllib.error import HTTPError
 from astropy import units as u
 from astropy.table import Table
 
@@ -16,10 +17,10 @@ __all__ = ['get_calspec_keys',
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
 
 
-def _getCalspecDataFrame():
+def getCalspecDataFrame():
     dirname = _getPackageDir()
-    filename = os.path.join(dirname, "../tables/calspec.pkl")
-    df = pd.read_pickle(filename)
+    filename = os.path.join(dirname, "../calspec_data/calspec.csv")
+    df = pd.read_csv(filename)
     return df
 
 
@@ -53,7 +54,7 @@ def get_calspec_keys(star_label):
     ...
     """
     label = star_label.upper()
-    df = _getCalspecDataFrame()
+    df = getCalspecDataFrame()
     return (df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label) \
         | (df["Alt_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
 
@@ -100,8 +101,7 @@ class Calspec:
         --------
         >>> c = Calspec("* eta01 Dor")
         >>> print(c)   #doctest: +ELLIPSIS
-           Star_name...
-        ...  ETA1 DOR...
+        eta1dor
         >>> c = Calspec("etta dor")   #doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
@@ -109,17 +109,16 @@ class Calspec:
         >>> c = Calspec("mu col")
         >>> c = Calspec("* mu. Col")
         >>> print(c)   #doctest: +ELLIPSIS
-           Star_name...
-        ...  MU COL...
+        mucol
         """
         self.label = calspec_label.upper()
         test = is_calspec(self.label)
         if not test:
             raise KeyError(f"{self.label} not found in Calspec tables.")
-        df = _getCalspecDataFrame()
+        df = getCalspecDataFrame()
         row = df[get_calspec_keys(self.label)]
         self.query = row
-        for col in row.columns:
+        for col in row.columns:  # sets .STIS and .Name attributes
             setattr(self, col, row[col].values[0])
         self.wavelength = None
         self.flux = None
@@ -127,7 +126,16 @@ class Calspec:
         self.syst = None
 
     def __str__(self):
-        return self.query.to_string()
+        return self.Name
+
+    def _santiseName(self, name):
+        """Special casing for cleaning up names in the table for use in
+        downloading.
+        """
+        name = name.lower()
+        if name == 'sdss151421':
+            name = 'sdssj151421'
+        return name
 
     def get_spectrum_fits_filename(self, output_directory=None):
         """
@@ -144,10 +152,14 @@ class Calspec:
         if not os.path.isdir(output_directory):
             os.mkdir(output_directory)
 
-        spectrum_file_name = self.Name+self.STIS+".fits"
+        spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
         output_file_name = os.path.join(output_directory, spectrum_file_name)
         if not os.path.isfile(output_file_name):
-            request.urlretrieve(CALSPEC_ARCHIVE+spectrum_file_name, output_file_name)
+            url = CALSPEC_ARCHIVE+spectrum_file_name
+            try:
+                request.urlretrieve(url, output_file_name)
+            except HTTPError as e:
+                raise RuntimeError(f"Failed to get data for {self.Name} from {url}") from e
         return output_file_name
 
     def get_spectrum_table(self, output_directory=None):
