@@ -19,8 +19,8 @@ CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/curre
 
 def getCalspecDataFrame():
     dirname = _getPackageDir()
-    filename = os.path.join(dirname, "../calspec_data/calspec.pkl")
-    df = pd.read_pickle(filename)
+    filename = os.path.join(dirname, "../calspec_data/calspec.csv")
+    df = pd.read_csv(filename)
     return df
 
 
@@ -101,8 +101,7 @@ class Calspec:
         --------
         >>> c = Calspec("* eta01 Dor")
         >>> print(c)   #doctest: +ELLIPSIS
-           Star_name...
-        ...  ETA1 DOR...
+        eta1dor
         >>> c = Calspec("etta dor")   #doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
@@ -110,8 +109,7 @@ class Calspec:
         >>> c = Calspec("mu col")
         >>> c = Calspec("* mu. Col")
         >>> print(c)   #doctest: +ELLIPSIS
-           Star_name...
-        ...  MU COL...
+        mucol
         """
         self.label = calspec_label.upper()
         test = is_calspec(self.label)
