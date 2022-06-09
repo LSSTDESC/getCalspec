@@ -27,7 +27,7 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose'],
     package_dir={'getCalspec': './getCalspec'},
-    package_data={'spectractor': ['../tables/calspec.csv', '../tables/calspec.pkl']},
+    package_data={'getCalspec': ['../calspec_data/calspec.csv', '../calspec_data/calspec.pkl']},
     url='https://github.com/LSSTDESC/getCalspec',
     license='BSD',
     python_requires='>=3.7',
