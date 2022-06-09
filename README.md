@@ -1,7 +1,7 @@
 # getCalspec
-Python package to load Calspec spectra.
+Python package to download Calspec spectra.
 
-The main function query the Calspec table located in `tables/calspec.pkl` 
+The main function query the Calspec table located in `calspec_data/calspec.csv` 
 to download spectrum FITS files from STSC archive https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html
 
 Example:
@@ -14,7 +14,8 @@ c.get_spectrum_numpy()  # download and return a dictionnary of numpy arrays with
 c.plot_spectrum()  # download and plot the spectrum
 ```
 
-Rebuild the tables:
+When the [STSC webpage](https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec), 
+it might be necessary to rebuild the `calspec_data/calspec.csv` table and the cache:
 ```
 from getCalspec.rebuild import rebuild_tables, rebuild_cache
 rebuild_tables()
