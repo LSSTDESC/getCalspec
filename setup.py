@@ -2,12 +2,12 @@ from setuptools import setup
 import os
 import re
 
-reqs = open('requirements.txt', 'r').read().strip().splitlines()
-if os.getenv('READTHEDOCS'):
-    reqs.remove('mpi4py')
 
-with open('README.md') as file:
-    long_description = file.read()
+# read the contents of your README file
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 
 version_file = os.path.join('getCalspec', '_version.py')
 verstrline = open(version_file, "rt").read()
@@ -23,7 +23,7 @@ setup(
     name='getCalspec',
     version=current_version,
     packages=['getCalspec'],
-    install_requires=reqs,
+    install_requires=['numpy>1.15', 'scipy', 'matplotlib>3.1', 'pandas', 'astropy', 'astroquery', 'lxml'],
     test_suite='nose.collector',
     tests_require=['nose'],
     package_dir={'getCalspec': './getCalspec'},
@@ -35,4 +35,5 @@ setup(
     author_email='jeremy.neveu@universite-paris-saclay.fr',
     description='',
     long_description=long_description,
+    long_description_content_type='text/markdown'
 )
