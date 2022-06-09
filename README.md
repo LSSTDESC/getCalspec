@@ -14,7 +14,7 @@ c.get_spectrum_numpy()  # download and return a dictionnary of numpy arrays with
 c.plot_spectrum()  # download and plot the spectrum
 ```
 
-When the [STSC webpage](https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec), 
+When the [STSC webpage](https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec) is updated, 
 it might be necessary to rebuild the `calspec_data/calspec.csv` table and the cache:
 ```
 from getCalspec.rebuild import rebuild_tables, rebuild_cache
