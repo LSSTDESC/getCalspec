@@ -2,7 +2,7 @@
 Python package to download Calspec spectra.
 
 The main function query the Calspec table located in `calspec_data/calspec.csv` 
-to download spectrum FITS files from STSC archive https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html
+to download spectrum FITS files from [STSC archive](https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html).
 
 Example:
 ```
