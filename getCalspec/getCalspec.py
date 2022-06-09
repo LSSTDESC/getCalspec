@@ -205,6 +205,8 @@ class Calspec:
         for k in range(0, 4):
             d[t.colnames[k]] = np.copy(t[t.colnames[k]][:])
             if t[t.colnames[k]].unit == "ANGSTROMS":
+                d[t.colnames[k]] *= u.angstrom
+            elif t[t.colnames[k]].unit == "NANOMETERS":
                 d[t.colnames[k]] *= u.nanometer
             elif t[t.colnames[k]].unit == "FLAM":
                 d[t.colnames[k]] *= u.erg / u.second / u.cm**2 / u.angstrom
