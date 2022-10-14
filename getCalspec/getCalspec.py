@@ -138,7 +138,8 @@ class Calspec:
         return name
 
     def get_spectrum_fits_filename(self):
-        """
+        """Downloads the data or pulls it from the cache if available.
+
         Examples
         --------
         >>> c = Calspec("eta1 dor")
