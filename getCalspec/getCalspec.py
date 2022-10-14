@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import warnings
 from urllib.error import URLError
 from astropy import units as u
 from astropy.table import Table
@@ -174,7 +175,9 @@ class Calspec:
 
         """
         output_file_name = self.get_spectrum_fits_filename()
-        t = Table.read(output_file_name)
+        with warnings.catch_warnings():  # calspec fits files use non-astropy units everywhere
+            warnings.filterwarnings("ignore", message='.*did not parse as fits unit')
+            t = Table.read(output_file_name)
         return t
 
     def get_spectrum_numpy(self):
