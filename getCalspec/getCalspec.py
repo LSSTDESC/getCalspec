@@ -144,12 +144,11 @@ class Calspec:
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> c.get_spectrum_fits_filename()
-        './calspec/eta1dor_stis_002.fits'
+        >>> c.get_spectrum_fits_filename()  #doctest: +ELLIPSIS
+        '...astropy/cache/download/url/...'
 
         """
         spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
-        output_file_name = None
         url = CALSPEC_ARCHIVE+spectrum_file_name
         try:
             output_file_name = download_file(url, cache=True)
