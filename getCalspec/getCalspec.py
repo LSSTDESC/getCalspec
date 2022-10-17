@@ -2,10 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-from urllib import request
-from urllib.error import HTTPError
+import warnings
+from urllib.error import URLError
 from astropy import units as u
 from astropy.table import Table
+from astropy.utils.data import download_file
 
 
 __all__ = ['get_calspec_keys',
@@ -137,32 +138,25 @@ class Calspec:
             name = 'sdssj151421'
         return name
 
-    def get_spectrum_fits_filename(self, output_directory=None):
-        """
+    def get_spectrum_fits_filename(self):
+        """Downloads the data or pulls it from the cache if available.
+
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> c.get_spectrum_fits_filename(output_directory="./calspec")
-        './calspec/eta1dor_stis_002.fits'
+        >>> c.get_spectrum_fits_filename()  #doctest: +ELLIPSIS
+        '...astropy/cache/download/url/...'
 
         """
-        if not output_directory:
-            output_directory = os.path.join(_getPackageDir(), "../calspec_data")
-
-        if not os.path.isdir(output_directory):
-            os.mkdir(output_directory)
-
         spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
-        output_file_name = os.path.join(output_directory, spectrum_file_name)
-        if not os.path.isfile(output_file_name):
-            url = CALSPEC_ARCHIVE+spectrum_file_name
-            try:
-                request.urlretrieve(url, output_file_name)
-            except HTTPError as e:
-                raise RuntimeError(f"Failed to get data for {self.Name} from {url}") from e
+        url = CALSPEC_ARCHIVE + spectrum_file_name
+        try:
+            output_file_name = download_file(url, cache=True)
+        except URLError as e:
+            raise RuntimeError(f"Failed to get data for {self.Name} from {url}") from e
         return output_file_name
 
-    def get_spectrum_table(self, output_directory=None):
+    def get_spectrum_table(self):
         """
 
         Returns
@@ -173,17 +167,19 @@ class Calspec:
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> t = c.get_spectrum_table(output_directory="./calspec")
+        >>> t = c.get_spectrum_table()
         >>> print(t)   #doctest: +ELLIPSIS
         WAVELENGTH...
         ANGSTROMS...
 
         """
-        output_file_name = self.get_spectrum_fits_filename(output_directory=output_directory)
-        t = Table.read(output_file_name)
+        output_file_name = self.get_spectrum_fits_filename()
+        with warnings.catch_warnings():  # calspec fits files use non-astropy units everywhere
+            warnings.filterwarnings("ignore", message='.*did not parse as fits unit')
+            t = Table.read(output_file_name)
         return t
 
-    def get_spectrum_numpy(self, output_directory=None):
+    def get_spectrum_numpy(self):
         """Make a dictionary of numpy arrays with astropy units from Calspec
         FITS file.
 
@@ -200,7 +196,7 @@ class Calspec:
         {'WAVELENGTH': <Quantity [...
 
         """
-        t = self.get_spectrum_table(output_directory=output_directory)
+        t = self.get_spectrum_table()
         d = {}
         for k in range(0, 4):
             d[t.colnames[k]] = np.copy(t[t.colnames[k]][:])
@@ -212,7 +208,7 @@ class Calspec:
                 d[t.colnames[k]] *= u.erg / u.second / u.cm**2 / u.angstrom
         return d
 
-    def plot_spectrum(self, xscale="log", yscale="log", output_directory=None):
+    def plot_spectrum(self, xscale="log", yscale="log"):
         """Plot Calspec spectrum.
 
         Examples
@@ -221,7 +217,7 @@ class Calspec:
         >>> c.plot_spectrum()
 
         """
-        t = self.get_spectrum_numpy(output_directory=output_directory)
+        t = self.get_spectrum_numpy()
         _ = plt.figure()
         plt.errorbar(t["WAVELENGTH"].value, t["FLUX"].value, yerr=t["STATERROR"].value)
         plt.grid()
