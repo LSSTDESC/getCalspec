@@ -23,7 +23,7 @@ setup(
     name='getCalspec',
     version=current_version,
     packages=['getCalspec'],
-    install_requires=['numpy>1.15', 'scipy', 'matplotlib>3.1', 'pandas', 'astropy', 'astroquery', 'lxml'],
+    install_requires=['numpy>1.15', 'matplotlib>3.1', 'pandas', 'astropy', 'astroquery'],
     test_suite='nose.collector',
     tests_require=['nose'],
     package_dir={'getCalspec': './getCalspec'},
