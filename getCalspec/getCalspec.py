@@ -149,7 +149,7 @@ class Calspec:
 
         """
         spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
-        url = CALSPEC_ARCHIVE+spectrum_file_name
+        url = CALSPEC_ARCHIVE + spectrum_file_name
         try:
             output_file_name = download_file(url, cache=True)
         except URLError as e:

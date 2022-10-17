@@ -11,7 +11,11 @@ __all__ = ["rebuild_tables",
            "download_all_data",
            ]
 
-CALSPEC_URL = "https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html"  # noqa: E501
+CALSPEC_URL = (
+    "https://www.stsci.edu/hst/instrumentation/"
+    "reference-data-for-calibration-and-tools/"
+    "astronomical-catalogs/calspec.html"
+)
 
 
 def add_astroquery_id(df):
