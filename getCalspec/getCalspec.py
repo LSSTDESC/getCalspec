@@ -57,7 +57,7 @@ def get_calspec_keys(star_label):
     label = star_label.upper()
     df = getCalspecDataFrame()
     return (df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label) \
-        | (df["Alt_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
+        | (df["Alternate_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
 
 
 def is_calspec(star_label):
