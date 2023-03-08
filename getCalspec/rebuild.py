@@ -3,6 +3,7 @@ import os
 import glob
 import pandas as pd
 import warnings
+import logging
 
 from .getCalspec import _getPackageDir, getCalspecDataFrame, Calspec
 
@@ -69,6 +70,14 @@ def clean_table(df):
 
 
 def rebuild_tables():
+    logger = logging.getLogger()
+    logger.warning("Calling this function rebuilds the csv file,"
+                   " which supplies which the fits file versions used to get the CALSPEC"
+                   " spectra. It should be called when you would like to pull in new spectra,"
+                   " though preferably this would be done by the package maintainers as part of"
+                   " a new release, such that the versions of the spectra remain tied to the"
+                   " package version.")
+
     tables = pd.read_html(CALSPEC_TABLE_URL)
     for table in tables:
         if isinstance(table.columns, pd.MultiIndex):
