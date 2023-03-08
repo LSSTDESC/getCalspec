@@ -14,7 +14,11 @@ __all__ = ['get_calspec_keys',
            'Calspec',
            ]
 
-
+# do not use reference-atlases/cdbs/current_calspec as that only contains the
+# most recent version. Instead, use reference-atlases/cdbs/calspec/ as this
+# contains all current and past versions, so the version which is in the csv
+# file will actually be there, even if there is a newer version, which will
+# then be picked up when we update the tables
 CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/calspec/"
 
 
