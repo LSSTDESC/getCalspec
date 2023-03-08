@@ -91,12 +91,7 @@ def rebuild_tables():
     csvFilename = os.path.join(packageDir, '../calspec_data', 'calspec.csv')
     csvFilename = os.path.abspath(csvFilename)
     df.to_csv(csvFilename)
-    print(f'Successful wrote new .csv file to {csvFilename}')
-
-    pickleFilename = os.path.join(packageDir, '../calspec_data', 'calspec.pkl')
-    pickleFilename = os.path.abspath(pickleFilename)
-    df.to_pickle(pickleFilename)
-    print(f'Successful wrote new .pkl file to {pickleFilename}')
+    print(f'Successfully wrote new .csv file to {csvFilename}')
 
 
 def _deleteCache():
