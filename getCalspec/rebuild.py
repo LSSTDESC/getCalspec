@@ -3,6 +3,7 @@ import os
 import glob
 import pandas as pd
 import warnings
+import logging
 
 from .getCalspec import _getPackageDir, getCalspecDataFrame, Calspec
 
@@ -11,7 +12,9 @@ __all__ = ["rebuild_tables",
            "download_all_data",
            ]
 
-CALSPEC_URL = (
+# the address of the page which contains the tables listing the most recent
+# versions for each star's data
+CALSPEC_TABLE_URL = (
     "https://www.stsci.edu/hst/instrumentation/"
     "reference-data-for-calibration-and-tools/"
     "astronomical-catalogs/calspec.html"
@@ -67,7 +70,15 @@ def clean_table(df):
 
 
 def rebuild_tables():
-    tables = pd.read_html(CALSPEC_URL)
+    logger = logging.getLogger()
+    logger.warning("Calling this function rebuilds the csv file,"
+                   " which supplies which the fits file versions used to get the CALSPEC"
+                   " spectra. It should be called when you would like to pull in new spectra,"
+                   " though preferably this would be done by the package maintainers as part of"
+                   " a new release, such that the versions of the spectra remain tied to the"
+                   " package version.")
+
+    tables = pd.read_html(CALSPEC_TABLE_URL)
     for table in tables:
         if isinstance(table.columns, pd.MultiIndex):
             table.columns = table.columns.droplevel(1)  # drop mulitindex columns
@@ -89,12 +100,7 @@ def rebuild_tables():
     csvFilename = os.path.join(packageDir, '../calspec_data', 'calspec.csv')
     csvFilename = os.path.abspath(csvFilename)
     df.to_csv(csvFilename)
-    print(f'Successful wrote new .csv file to {csvFilename}')
-
-    pickleFilename = os.path.join(packageDir, '../calspec_data', 'calspec.pkl')
-    pickleFilename = os.path.abspath(pickleFilename)
-    df.to_pickle(pickleFilename)
-    print(f'Successful wrote new .pkl file to {pickleFilename}')
+    print(f'Successfully wrote new .csv file to {csvFilename}')
 
 
 def _deleteCache():

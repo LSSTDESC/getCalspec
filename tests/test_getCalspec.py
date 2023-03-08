@@ -4,7 +4,7 @@ from astropy.table import Table as astropyTable
 
 
 class GetCalspecTestCase(unittest.TestCase):
-    """A test case for the defect finding task."""
+    """A test case for the getCalspec package."""
 
     def test_is_calspec(self):
         self.assertTrue(is_calspec("eta1 dor"))
