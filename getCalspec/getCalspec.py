@@ -15,7 +15,7 @@ __all__ = ['get_calspec_keys',
            ]
 
 
-CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/current_calspec/"
+CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/calspec/"
 
 
 def getCalspecDataFrame():
