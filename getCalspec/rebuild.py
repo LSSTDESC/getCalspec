@@ -11,7 +11,9 @@ __all__ = ["rebuild_tables",
            "download_all_data",
            ]
 
-CALSPEC_URL = (
+# the address of the page which contains the tables listing the most recent
+# versions for each star's data
+CALSPEC_TABLE_URL = (
     "https://www.stsci.edu/hst/instrumentation/"
     "reference-data-for-calibration-and-tools/"
     "astronomical-catalogs/calspec.html"
@@ -67,7 +69,7 @@ def clean_table(df):
 
 
 def rebuild_tables():
-    tables = pd.read_html(CALSPEC_URL)
+    tables = pd.read_html(CALSPEC_TABLE_URL)
     for table in tables:
         if isinstance(table.columns, pd.MultiIndex):
             table.columns = table.columns.droplevel(1)  # drop mulitindex columns
