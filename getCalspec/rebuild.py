@@ -46,6 +46,8 @@ def add_alt_star_name(df):
     for i, row in df.iterrows():
         if row["Star name"] == "ETA1 DOR":
             df.at[i, "Alt Star name"] = "ETA DOR"
+        if row["Star name"] == "HD607537":
+            df.at[i, "Alt Star name"] = "HD60753"
 
 
 def clean_table(df):
@@ -89,7 +91,7 @@ def rebuild_tables():
 
     df = tables[0]
     if len(tables) > 1:
-        df = df.append(tables[1])
+        df = pd.concat([df, tables[1]])
         df = pd.merge(df, tables[2], on="Star name", how='left')
 
     add_astroquery_id(df)
