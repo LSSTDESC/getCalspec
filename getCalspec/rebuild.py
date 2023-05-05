@@ -48,6 +48,8 @@ def add_alt_star_name(df):
             df.at[i, "Alt Star name"] = "ETA DOR"
         if row["Star name"] == "HD607537":
             df.at[i, "Alt Star name"] = "HD60753"
+        if row["Star name"] == "MU COL":
+            df.at[i, "Alt Star name"] = "HD38666"
 
 
 def clean_table(df):
