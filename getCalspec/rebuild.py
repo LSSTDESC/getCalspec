@@ -60,7 +60,6 @@ def add_alt_star_name(df):
                 for name in list(all_names['ID']):
                     if "HD" in name:
                         df.at[i, "Alt Star name"] = name.replace(' ','')
-                        print(name, row["Star name"])
             else:
                 continue
 
