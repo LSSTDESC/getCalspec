@@ -45,9 +45,25 @@ def add_astroquery_id(df):
 
 
 def add_alt_star_name(df):
+    name_columns = [name for name in df.columns if "name" in name.lower()]
+    print(name_columns)
     for i, row in df.iterrows():
         if row["Star name"] == "ETA1 DOR":
             df.at[i, "Alt Star name"] = "ETA DOR"
+        else:
+            all_names = None
+            for name in name_columns:
+                all_names = Simbad.query_objectids(row[name])
+                if all_names is not None and len(all_names) > 0:
+                    break
+            if all_names is not None:
+                for name in list(all_names['ID']):
+                    if "HD" in name:
+                        df.at[i, "Alt Star name"] = name.replace(' ','')
+                        print(name, row["Star name"])
+            else:
+                continue
+
 
 
 def clean_table(df):
