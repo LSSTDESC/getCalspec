@@ -60,8 +60,14 @@ def get_calspec_keys(star_label):
     """
     label = star_label.upper()
     df = getCalspecDataFrame()
-    return (df["Astroquery_Name"] == label) | (df["Simbad_Name"] == label) | (df["Star_name"] == label) \
-        | (df["Alternate_Simbad_Name"] == label) | (df["Alt_Star_name"] == label)
+    name_columns = [name for name in df.columns if "_name" in name.lower()]
+    if len(name_columns) > 0:
+        keys = df[name_columns[0]] == label
+        for name in name_columns[1:]:
+            keys = keys | (df[name] == label )
+        return keys
+    else:
+        raise KeyError("No column label with _name in calspec.csv")
 
 
 def is_calspec(star_label):
