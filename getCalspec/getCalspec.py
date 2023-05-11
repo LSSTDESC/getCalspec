@@ -64,7 +64,7 @@ def get_calspec_keys(star_label):
     if len(name_columns) > 0:
         keys = df[name_columns[0]] == label
         for name in name_columns[1:]:
-            keys = keys | (df[name] == label )
+            keys = keys | (df[name] == label)
         return keys
     else:
         raise KeyError("No column label with _name in calspec.csv")
