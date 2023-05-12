@@ -58,13 +58,17 @@ def get_calspec_keys(star_label):
     1      False
     ...
     """
-    label = star_label.upper()
+    label = star_label.upper().replace(' ','')
     df = getCalspecDataFrame()
     name_columns = [name for name in df.columns if "_name" in name.lower()]
     if len(name_columns) > 0:
-        keys = df[name_columns[0]] == label
+        tmp_df = df[name_columns[0]].str.upper()
+        tmp_df = tmp_df.str.replace(' ','')
+        keys = tmp_df == label
         for name in name_columns[1:]:
-            keys = keys | (df[name] == label)
+            tmp_df = df[name].str.upper()
+            tmp_df = tmp_df.str.replace(' ', '')
+            keys = keys | (tmp_df == label)
         return keys
     else:
         raise KeyError("No column label with _name in calspec.csv")
