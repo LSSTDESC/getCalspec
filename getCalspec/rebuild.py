@@ -45,8 +45,9 @@ def add_astroquery_id(df):
 
 
 def add_alt_star_name(df):
+    """Operates on the dataframe in-place, adding the alternate names for each star (row),
+    and removes spaces from HD stars."""
     name_columns = [name for name in df.columns if "name" in name.lower()]
-    print(name_columns)
     for i, row in df.iterrows():
         if row["Star name"] == "ETA1 DOR":
             df.at[i, "Alt Star name"] = "ETA DOR"
@@ -60,9 +61,6 @@ def add_alt_star_name(df):
                 for name in list(all_names['ID']):
                     if "HD" in name:
                         df.at[i, "Alt Star name"] = name.replace(' ','')
-            else:
-                continue
-
 
 
 def clean_table(df):
@@ -86,7 +84,7 @@ def clean_table(df):
     df.reset_index(drop=False, inplace=True)
     # remove _stis from Model column and put it in STIS column
     for index, row in df.iterrows():
-        if type(row["Model"]) is str and "stis" in row["Model"]:
+        if isinstance(row["Model"], str) and "stis" in row["Model"]:
             df.at[index, "STIS"] = row["Model"]
             df.at[index, "Model"] = ""
 
