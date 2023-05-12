@@ -62,10 +62,8 @@ def get_calspec_keys(star_label):
     df = getCalspecDataFrame()
     name_columns = [name for name in df.columns if "_name" in name.lower()]
     if len(name_columns) > 0:
-        tmp_df = df[name_columns[0]].str.upper()
-        tmp_df = tmp_df.str.replace(' ','')
-        keys = tmp_df == label
-        for name in name_columns[1:]:
+        keys = pd.Series([False] * len(df))
+        for name in name_columns:
             tmp_df = df[name].str.upper()
             tmp_df = tmp_df.str.replace(' ', '')
             keys = keys | (tmp_df == label)
