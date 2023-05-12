@@ -121,7 +121,10 @@ class Calspec:
         KeyError: 'ETTA DOR not found in Calspec tables.'
         >>> c = Calspec("mu col")
         >>> c = Calspec("* mu. Col")
-        >>> print(c)   #doctest: +ELLIPSIS
+        >>> print(c)
+        mucol
+        >>> c = Calspec("HD38666")
+        >>> print(c)
         mucol
         """
         self.label = calspec_label.upper()

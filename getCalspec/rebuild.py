@@ -51,16 +51,16 @@ def add_alt_star_name(df):
     for i, row in df.iterrows():
         if row["Star name"] == "ETA1 DOR":
             df.at[i, "Alt Star name"] = "ETA DOR"
-        else:
-            all_names = None
-            for name in name_columns:
-                all_names = Simbad.query_objectids(row[name])
-                if all_names is not None and len(all_names) > 0:
-                    break
-            if all_names is not None:
-                for name in list(all_names['ID']):
-                    if "HD" in name:
-                        df.at[i, "Alt Star name"] = name.replace(' ','')
+    for i, row in df.iterrows():
+        all_names = None
+        for name in name_columns:
+            all_names = Simbad.query_objectids(row[name])
+            if all_names is not None and len(all_names) > 0:
+                break
+        if all_names is not None:
+            for name in list(all_names['ID']):
+                if name.startswith('HD'):
+                    df.at[i, "HD name"] = name.replace(' ','')
 
 
 def clean_table(df):
