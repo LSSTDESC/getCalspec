@@ -37,6 +37,18 @@ def _getPackageDir():
     return dirname
 
 
+def sanitizeString(label):
+    """This method sanitizes the star label."""
+    return label.upper().replace(' ','')
+
+
+def sanitizeDataFrame(df):
+    """This method sanitizes the star label."""
+    tmp_df = df.str.upper()
+    tmp_df = tmp_df.str.replace(' ', '')
+    return tmp_df
+
+
 def get_calspec_keys(star_label):
     """Return the DataFrame keys if a star name corresponds to a Calspec entry
     in the tables.
@@ -58,14 +70,13 @@ def get_calspec_keys(star_label):
     1      False
     ...
     """
-    label = star_label.upper().replace(' ','')
+    label = sanitizeString(star_label)
     df = getCalspecDataFrame()
     name_columns = [name for name in df.columns if "_name" in name.lower()]
     if len(name_columns) > 0:
         keys = pd.Series([False] * len(df))
         for name in name_columns:
-            tmp_df = df[name].str.upper()
-            tmp_df = tmp_df.str.replace(' ', '')
+            tmp_df = sanitizeDataFrame(df[name])
             keys = keys | (tmp_df == label)
         return keys
     else:
@@ -92,7 +103,7 @@ def is_calspec(star_label):
     >>> is_calspec("eta dor")
     True
     """
-    return np.any(get_calspec_keys(star_label.upper()))
+    return np.any(get_calspec_keys(sanitizeString(star_label)))
 
 
 class Calspec:
@@ -118,7 +129,7 @@ class Calspec:
         >>> c = Calspec("etta dor")   #doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
-        KeyError: 'ETTA DOR not found in Calspec tables.'
+        KeyError: 'etta dor not found in Calspec tables.'
         >>> c = Calspec("mu col")
         >>> c = Calspec("* mu. Col")
         >>> print(c)
@@ -127,10 +138,10 @@ class Calspec:
         >>> print(c)
         mucol
         """
-        self.label = calspec_label.upper()
+        self.label = sanitizeString(calspec_label)
         test = is_calspec(self.label)
         if not test:
-            raise KeyError(f"{self.label} not found in Calspec tables.")
+            raise KeyError(f"{calspec_label} not found in Calspec tables.")
         df = getCalspecDataFrame()
         row = df[get_calspec_keys(self.label)]
         self.query = row
