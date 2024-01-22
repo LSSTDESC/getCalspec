@@ -130,9 +130,15 @@ def update_history_table():
         output_file_name = download_file(url, cache=True)
         header = fits.getheader(output_file_name)
         date = None
-        for line in header["HISTORY"]:
-            if "written by" in line.lower():
-                date = line.split(" ")[-1]
+        if "DATE" in header:
+            date = header["DATE"]
+        else:
+            for line in header["HISTORY"]:
+                if "written by" in line.lower():
+                    words = line.split(" ")
+                    for w in words:
+                        if w.count('-') == 2:
+                            date = w
         if "TARGETID" in header:
             calspec_name = header["TARGETID"].lower()
         else:
