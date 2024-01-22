@@ -137,6 +137,7 @@ def rebuild_tables():
     df.to_csv(csvFilename)
     print(f'Successfully wrote new .csv file to {csvFilename}')
 
+
 def update_history_table():
     """Update history.csv table.
 
@@ -161,15 +162,17 @@ def update_history_table():
         output_file_name = download_file(url, cache=True)
         header = fits.getheader(output_file_name)
         date = None
-        if "DATE" in header:
-            date = header["DATE"]
-        else:
+        if "HISTORY" in header:
             for line in header["HISTORY"]:
                 if "written by" in line.lower():
                     words = line.split(" ")
                     for w in words:
                         if w.count('-') == 2:
                             date = w
+        elif "DATE" in header:
+            date = header["DATE"]
+        else:
+            raise KeyError(f"HISTORY and DATE keys are absent from header of {filename=}. Cannot get file creation date.")
         if "TARGETID" in header:
             calspec_name = header["TARGETID"].lower()
         else:
