@@ -10,7 +10,7 @@ from getCalspec.getCalspec import *
 
 test = is_calspec("eta1 dor")
 c = Calspec("eta1 dor")
-c.get_spectrum_fits_filename()  # download the fits file
+c.download_spectrum_fits_filename()  # download the fits file
 c.get_spectrum_table()  # download and return an Astropy table
 c.get_spectrum_numpy()  # download and return a dictionnary of numpy arrays with units
 c.plot_spectrum()  # download and plot the spectrum

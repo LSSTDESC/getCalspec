@@ -142,13 +142,52 @@ class Calspec:
             name = 'sdssj151421'
         return name
 
-    def get_spectrum_fits_filename(self, type="stis"):
+    def get_spectrum_fits_filename(self, type="stis", date="latest"):
+        """Get the file name extension of type 'mod' or 'stis' at the closest date before the given date.
+
+        Parameters
+        ----------
+        type: str
+            Choose between STIS or model spectrum. Must be either 'stis' or 'mod' (default: 'stis').
+        date: str
+            The most recent file before the given date will be returned (default: 'latest'). One can use all datetime
+            formats understood by pandas `to_datetime()` method.
+
+        Returns
+        -------
+        spectrum_file_name: str
+            Spectrum file name in astropy cache folder.
+
+        Examples
+        --------
+        >>> c = Calspec("10 lac")
+        >>> c.get_spectrum_fits_filename(type="stis", date="latest")  #doctest: +ELLIPSIS
+        '10lac_stis_007.fits'
+        >>> c.get_spectrum_fits_filename(type="mod", date="2021-03-20")  #doctest: +ELLIPSIS
+        '10lac_mod_003.fits'
+        """
+        if type.lower() not in ["stis", "mod"]:
+            raise ValueError(f"Type argument must be either 'stis' or 'mod'. Got {type=}.")
+        versions = getHistoryDataFrame()
+        versions.sort_values("Filename")  # ensure table is orderd in time
+        rows = versions.loc[(versions['Name'] == self.Name) & (versions["Extension"].str.contains(type.lower()))]
+        if date == 'latest':
+            extension = rows['Extension'].iloc[-1]
+        else:
+            dt = pd.to_datetime(date)
+            versions["Date"] = pd.to_datetime(versions["Date"], format="mixed")
+            latest_row_before_date = rows.loc[max(rows[pd.to_datetime(rows["Date"]) < dt].index)]
+            extension = latest_row_before_date['Extension']
+        spectrum_file_name = self._sanitiseName(self.Name) + extension.replace('*', '') + ".fits"
+        return spectrum_file_name
+
+    def download_spectrum_fits_filename(self, type="stis", date="latest"):
         """Downloads the data or pulls it from the cache if available.
 
         Parameters
         ----------
         type: str
-            Choose between STIS or model spectrum. Must be either 'stis' or 'model' (default: 'stis').
+            Choose between STIS or model spectrum. Must be either 'stis' or 'mod' (default: 'stis').
 
         Returns
         -------
@@ -158,18 +197,14 @@ class Calspec:
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> c.get_spectrum_fits_filename()  #doctest: +ELLIPSIS
+        >>> c = Calspec("10 lac")
+        >>> c.download_spectrum_fits_filename()  #doctest: +ELLIPSIS
         '...astropy/cache/download/url/...'
-        >>> c.get_spectrum_fits_filename(type="model")  #doctest: +ELLIPSIS
+        >>> c.download_spectrum_fits_filename(type="mod", date="2021-12-11")  #doctest: +ELLIPSIS
         '...astropy/cache/download/url/...'
 
         """
-        if type.lower() not in ["stis", "model"]:
-            raise ValueError(f"Type argument must be either 'stis' or 'model'. Got {type=}.")
-        if type.lower() == 'stis':
-            spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
-        else:
-            spectrum_file_name = self._santiseName(self.Name) + self.Model.replace('*', '') + ".fits"
+        spectrum_file_name = self.get_spectrum_fits_filename(type=type, date=date)
         url = CALSPEC_ARCHIVE + spectrum_file_name
         try:
             output_file_name = download_file(url, cache=True)
