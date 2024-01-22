@@ -236,7 +236,7 @@ class Calspec:
         ANGSTROMS...
 
         """
-        output_file_name = self.get_spectrum_fits_filename()
+        output_file_name = self.download_spectrum_fits_filename()
         with warnings.catch_warnings():  # calspec fits files use non-astropy units everywhere
             warnings.filterwarnings("ignore", message='.*did not parse as fits unit')
             t = Table.read(output_file_name)
