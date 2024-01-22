@@ -7,7 +7,8 @@ import logging
 from astropy.utils.data import download_file
 from astropy.io import fits
 from bs4 import BeautifulSoup
-import requests
+import urllib.request
+
 
 from getCalspec import _getPackageDir, getCalspecDataFrame, Calspec, CALSPEC_ARCHIVE
 
@@ -47,9 +48,22 @@ def add_astroquery_id(df):
 
 
 def add_alt_star_name(df):
+    """Operates on the dataframe in-place, adding the alternate names for each star (row),
+    and removes spaces from HD stars."""
+    name_columns = [name for name in df.columns if "name" in name.lower()]
     for i, row in df.iterrows():
         if row["Star name"] == "ETA1 DOR":
             df.at[i, "Alt Star name"] = "ETA DOR"
+    for i, row in df.iterrows():
+        all_names = None
+        for name in name_columns:
+            all_names = Simbad.query_objectids(row[name])
+            if all_names is not None and len(all_names) > 0:
+                break
+        if all_names is not None:
+            for name in list(all_names['ID']):
+                if name.startswith('HD'):
+                    df.at[i, "HD name"] = name.replace(' ','')
 
 
 def clean_table(df):
@@ -71,6 +85,11 @@ def clean_table(df):
     df.set_index("Star_name", inplace=True)
     df.drop(index="[1]", inplace=True)
     df.reset_index(drop=False, inplace=True)
+    # remove _stis from Model column and put it in STIS column
+    for index, row in df.iterrows():
+        if isinstance(row["Model"], str) and "stis" in row["Model"]:
+            df.at[index, "STIS"] = row["Model"]
+            df.at[index, "Model"] = ""
 
 
 def rebuild_tables():
@@ -82,10 +101,21 @@ def rebuild_tables():
                    " a new release, such that the versions of the spectra remain tied to the"
                    " package version.")
 
-    tables = pd.read_html(CALSPEC_TABLE_URL)
+    webpage = urllib.request.urlopen(CALSPEC_TABLE_URL).read()
+    soup = BeautifulSoup(webpage, 'html.parser')
+    # clean superscripts in table
+    for x in soup.find_all('sup'):
+        x.extract()
+    # find tables
+    web_tables = soup.find_all("table")
+    tables = []
+    # convert to pd.DataFrame
+    for web_table in web_tables:
+        tables.append(pd.read_html(str(web_table))[0])
+    # format tables
     for table in tables:
         if isinstance(table.columns, pd.MultiIndex):
-            table.columns = table.columns.droplevel(1)  # drop mulitindex columns
+            table.columns = table.columns.droplevel(1)  # drop multiindex columns
         table.rename(columns={"Star Name": "Star name"}, inplace=True)
         # table.set_index("Star name", inplace=True)
         if r"[1]" in table.index:
@@ -93,7 +123,7 @@ def rebuild_tables():
 
     df = tables[0]
     if len(tables) > 1:
-        df = df.append(tables[1])
+        df = pd.concat([df, tables[1]])
         df = pd.merge(df, tables[2], on="Star name", how='left')
 
     add_astroquery_id(df)
@@ -155,12 +185,11 @@ def update_history_table():
     df.to_csv(csvFilename)
 
 
-
-
 def _getFileListFromURL(url, ext=".fits"):
-    page = requests.get(url).text
+    page = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(page, 'html.parser')
     return [os.path.join(url, node.get('href')) for node in soup.find_all('a') if node.get('href').endswith(ext)]
+
 
 def _deleteCache():
     dataPath = os.path.join(_getPackageDir(), "../calspec_data")
