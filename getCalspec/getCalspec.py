@@ -12,6 +12,9 @@ from astropy.utils.data import download_file
 __all__ = ['get_calspec_keys',
            'is_calspec',
            'Calspec',
+           '_getPackageDir',
+           'getCalspecDataFrame',
+           'CALSPEC_ARCHIVE'
            ]
 
 # do not use reference-atlases/cdbs/current_calspec as that only contains the
@@ -194,18 +197,20 @@ class Calspec:
         '10lac_stis_007.fits'
         >>> c.get_spectrum_fits_filename(type="mod", date="2021-03-20")  #doctest: +ELLIPSIS
         '10lac_mod_003.fits'
+        >>> c.get_spectrum_fits_filename(type="mod", date="2024-01-01")  #doctest: +ELLIPSIS
+        '10lac_mod_005.fits'
         """
         if type.lower() not in ["stis", "mod"]:
             raise ValueError(f"Type argument must be either 'stis' or 'mod'. Got {type=}.")
         versions = getHistoryDataFrame()
-        versions.sort_values("Filename")  # ensure table is orderd in time
+        versions.sort_values("Filename")  # ensure table is ordered in time
         rows = versions.loc[(versions['Name'] == self.Name) & (versions["Extension"].str.contains(type.lower()))]
         if date == 'latest':
             extension = rows['Extension'].iloc[-1]
         else:
             dt = pd.to_datetime(date)
-            versions["Date"] = pd.to_datetime(versions["Date"], format="mixed")
-            latest_row_before_date = rows.loc[max(rows[pd.to_datetime(rows["Date"]) < dt].index)]
+            rows.loc[:, "Date"] = pd.to_datetime(rows["Date"], format="mixed")
+            latest_row_before_date = rows.loc[max(rows[rows["Date"] < dt].index)]
             extension = latest_row_before_date['Extension']
         spectrum_file_name = self._sanitizeName(self.Name) + extension.replace('*', '') + ".fits"
         return spectrum_file_name
