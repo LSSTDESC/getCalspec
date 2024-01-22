@@ -14,6 +14,7 @@ from getCalspec import _getPackageDir, getCalspecDataFrame, Calspec, CALSPEC_ARC
 
 __all__ = ["rebuild_tables",
            "rebuild_cache",
+           "update_history_table",
            "download_all_data",
            ]
 
