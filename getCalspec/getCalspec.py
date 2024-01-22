@@ -140,7 +140,7 @@ class Calspec:
     def __str__(self):
         return self.Name
 
-    def _santiseName(self, name):
+    def _sanitiseName(self, name):
         """Special casing for cleaning up names in the table for use in
         downloading.
         """
