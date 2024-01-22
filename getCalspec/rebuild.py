@@ -106,15 +106,12 @@ def rebuild_tables():
     df.to_csv(csvFilename)
     print(f'Successfully wrote new .csv file to {csvFilename}')
 
-def update_version_table():
-    """
-
-    Returns
-    -------
+def update_history_table():
+    """Update history.csv table.
 
     Examples
     --------
-    >>> update_version_table()
+    >>> update_history_table()
     """
     packageDir = _getPackageDir()
     csvFilename = os.path.abspath(os.path.join(packageDir, '../calspec_data', 'history.csv'))
@@ -136,7 +133,13 @@ def update_version_table():
         for line in header["HISTORY"]:
             if "written by" in line.lower():
                 date = line.split(" ")[-1]
-        calspec_name = header["TARGETID"].lower()
+        if "TARGETID" in header:
+            calspec_name = header["TARGETID"].lower()
+        else:
+            if "mod" in filename:
+                calspec_name = filename.split("mod")[0]
+            else:
+                calspec_name = filename.split("stis")[0]
         ext = filename.split(calspec_name)[-1]
         ext = ext.split(".")[0]
         row = {'Filename': filename, 'Name': calspec_name, 'Extension': ext, 'Date': date}
