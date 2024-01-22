@@ -142,17 +142,34 @@ class Calspec:
             name = 'sdssj151421'
         return name
 
-    def get_spectrum_fits_filename(self):
+    def get_spectrum_fits_filename(self, type="stis"):
         """Downloads the data or pulls it from the cache if available.
+
+        Parameters
+        ----------
+        type: str
+            Choose between STIS or model spectrum. Must be either 'stis' or 'model' (default: 'stis').
+
+        Returns
+        -------
+        spectrum_file_name: str
+            Spectrum file name in astropy cache folder.
 
         Examples
         --------
         >>> c = Calspec("eta1 dor")
         >>> c.get_spectrum_fits_filename()  #doctest: +ELLIPSIS
         '...astropy/cache/download/url/...'
+        >>> c.get_spectrum_fits_filename(type="model")  #doctest: +ELLIPSIS
+        '...astropy/cache/download/url/...'
 
         """
-        spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
+        if type.lower() not in ["stis", "model"]:
+            raise ValueError(f"Type argument must be either 'stis' or 'model'. Got {type=}.")
+        if type.lower() == 'stis':
+            spectrum_file_name = self._santiseName(self.Name) + self.STIS.replace('*', '') + ".fits"
+        else:
+            spectrum_file_name = self._santiseName(self.Name) + self.Model.replace('*', '') + ".fits"
         url = CALSPEC_ARCHIVE + spectrum_file_name
         try:
             output_file_name = download_file(url, cache=True)
