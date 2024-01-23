@@ -25,6 +25,7 @@ jobs:
       - name: Install
         shell: bash -l {0}
         run: |
+          pip install nose pytest-flake8
           pip install -v -e .
 
       - name: List installed packages
