@@ -25,7 +25,7 @@ setup(
     packages=['getCalspec'],
     install_requires=['numpy>1.15', 'matplotlib>3.1', 'pandas', 'astropy', 'astroquery', 'lxml', 'beautifulsoup4'],
     test_suite='nose.collector',
-    tests_require=['nose'],
+    tests_require=['nose', 'pytest-flake8'],
     package_dir={'getCalspec': './getCalspec'},
     package_data={'getCalspec': ['../calspec_data/calspec.csv', '../calspec_data/history.csv']},
     url='https://github.com/LSSTDESC/getCalspec',
