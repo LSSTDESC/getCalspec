@@ -174,6 +174,15 @@ class Calspec:
             name = 'sdssj151421'
         return name
 
+    def get_file_dataframe(self, type="stis"):
+        if type.lower() not in ["stis", "mod"]:
+            raise ValueError(f"Type argument must be either 'stis' or 'mod'. Got {type=}.")
+        versions = getHistoryDataFrame()
+        versions.sort_values("Filename")  # ensure table is ordered in time
+        rows = versions.loc[(versions['Name'] == self.Name) & (versions["Extension"].str.contains(type.lower()))]
+        rows.loc[:, "Date"] = pd.to_datetime(rows["Date"], format="mixed")
+        return rows
+
     def get_spectrum_fits_filename(self, type="stis", date="latest"):
         """Get the file name extension of type 'mod' or 'stis' at the closest date before the given date.
 
@@ -193,24 +202,19 @@ class Calspec:
         Examples
         --------
         >>> c = Calspec("10 lac")
-        >>> c.get_spectrum_fits_filename(type="stis", date="latest")  #doctest: +ELLIPSIS
+        >>> c.get_spectrum_fits_filename(type="stis", date="latest")
         '10lac_stis_007.fits'
-        >>> c.get_spectrum_fits_filename(type="mod", date="2021-03-20")  #doctest: +ELLIPSIS
+        >>> c.get_spectrum_fits_filename(type="mod", date="2021-03-20")
         '10lac_mod_003.fits'
-        >>> c.get_spectrum_fits_filename(type="mod", date="2024-01-01")  #doctest: +ELLIPSIS
-        '10lac_mod_005.fits'
         """
-        if type.lower() not in ["stis", "mod"]:
-            raise ValueError(f"Type argument must be either 'stis' or 'mod'. Got {type=}.")
-        versions = getHistoryDataFrame()
-        versions.sort_values("Filename")  # ensure table is ordered in time
-        rows = versions.loc[(versions['Name'] == self.Name) & (versions["Extension"].str.contains(type.lower()))]
+        rows = self.get_file_dataframe(type=type)
         if date == 'latest':
             extension = rows['Extension'].iloc[-1]
         else:
             dt = pd.to_datetime(date)
-            rows.loc[:, "Date"] = pd.to_datetime(rows["Date"], format="mixed")
-            latest_row_before_date = rows.loc[max(rows[rows["Date"] < dt].index)]
+            if dt < min(rows["Date"]):
+                raise ValueError(f"Given {date=} is lower than the oldest available date {min(rows['Date'])=}.")
+            latest_row_before_date = rows.loc[max(rows[rows["Date"] <= dt].index)]
             extension = latest_row_before_date['Extension']
         spectrum_file_name = self._sanitizeName(self.Name) + extension.replace('*', '') + ".fits"
         return spectrum_file_name
@@ -231,7 +235,6 @@ class Calspec:
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> c = Calspec("10 lac")
         >>> c.download_spectrum_fits_filename()  #doctest: +ELLIPSIS
         '...astropy/cache/download/url/...'
         >>> c.download_spectrum_fits_filename(type="mod", date="2021-12-11")  #doctest: +ELLIPSIS
@@ -246,7 +249,7 @@ class Calspec:
             raise RuntimeError(f"Failed to get data for {self.Name} from {url}") from e
         return output_file_name
 
-    def get_spectrum_table(self):
+    def get_spectrum_table(self, type="stis", date="latest"):
         """
 
         Returns
@@ -263,13 +266,13 @@ class Calspec:
         ANGSTROMS...
 
         """
-        output_file_name = self.download_spectrum_fits_filename()
+        output_file_name = self.download_spectrum_fits_filename(type=type, date=date)
         with warnings.catch_warnings():  # calspec fits files use non-astropy units everywhere
             warnings.filterwarnings("ignore", message='.*did not parse as fits unit')
             t = Table.read(output_file_name)
         return t
 
-    def get_spectrum_numpy(self):
+    def get_spectrum_numpy(self, type="stis", date="latest"):
         """Make a dictionary of numpy arrays with astropy units from Calspec
         FITS file.
 
@@ -286,7 +289,7 @@ class Calspec:
         {'WAVELENGTH': <Quantity [...
 
         """
-        t = self.get_spectrum_table()
+        t = self.get_spectrum_table(type=type, date=date)
         d = {}
         for k in range(0, 4):
             d[t.colnames[k]] = np.copy(t[t.colnames[k]][:])
