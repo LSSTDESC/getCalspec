@@ -1,0 +1,39 @@
+name: build_and_test
+
+on:
+  push:
+    branches:
+      - main
+      - lsst-dev
+      - master
+  pull_request:
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: "3.11"
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          show-channel-urls: true
+          activate-environment: test
+
+      - name: Install
+        shell: bash -l {0}
+        run: |
+          pip install 'flake8<3.8' pytest-flake8 'pytest>=7.0'
+          pip install -v -e .
+
+      - name: List installed packages
+        shell: bash -l {0}
+        run: |
+          pip list -v
+
+      - name: Run pytest
+        shell: bash -l {0}
+        run: |
+          pytest tests

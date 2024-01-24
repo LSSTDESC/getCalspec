@@ -4,13 +4,17 @@ import glob
 import pandas as pd
 import warnings
 import logging
+from astropy.utils.data import download_file
+from astropy.io import fits
 from bs4 import BeautifulSoup
 import urllib.request
 
-from .getCalspec import _getPackageDir, getCalspecDataFrame, Calspec
+
+from getCalspec import _getPackageDir, getCalspecDataFrame, Calspec, CALSPEC_ARCHIVE
 
 __all__ = ["rebuild_tables",
            "rebuild_cache",
+           "update_history_table",
            "download_all_data",
            ]
 
@@ -132,6 +136,63 @@ def rebuild_tables():
     csvFilename = os.path.abspath(csvFilename)
     df.to_csv(csvFilename)
     print(f'Successfully wrote new .csv file to {csvFilename}')
+
+
+def update_history_table():
+    """Update history.csv table.
+
+    Examples
+    --------
+    >>> update_history_table()
+    """
+    packageDir = _getPackageDir()
+    csvFilename = os.path.abspath(os.path.join(packageDir, '../calspec_data', 'history.csv'))
+
+    if os.path.isfile(csvFilename):
+        df = pd.read_csv(csvFilename)
+    else:
+        df = pd.DataFrame(data={'Filename': [], 'Name': [], 'Extension': [], 'Date': []})
+    df.set_index('Filename', inplace=True)
+
+    urls = _getFileListFromURL(CALSPEC_ARCHIVE, ext=".fits")
+    for url in urls:
+        filename = os.path.basename(url)
+        if filename in df.index:
+            continue
+        output_file_name = download_file(url, cache=True)
+        header = fits.getheader(output_file_name)
+        date = None
+        if "HISTORY" in header:
+            for line in header["HISTORY"]:
+                if "written by" in line.lower():
+                    words = line.split(" ")
+                    for w in words:
+                        if w.count('-') == 2:
+                            date = w
+        elif "DATE" in header:
+            date = header["DATE"]
+        else:
+            raise KeyError(f"HISTORY and DATE keys are absent from header of {filename=}. Cannot get file creation date.")
+        if "TARGETID" in header:
+            calspec_name = header["TARGETID"].lower()
+        else:
+            if "mod" in filename:
+                calspec_name = filename.split("mod")[0]
+            else:
+                calspec_name = filename.split("stis")[0]
+        ext = filename.split(calspec_name)[-1]
+        ext = ext.split(".")[0]
+        row = {'Filename': filename, 'Name': calspec_name, 'Extension': ext, 'Date': date}
+        tmp_df = pd.DataFrame([row])
+        tmp_df.set_index('Filename', inplace=True)
+        df = pd.concat([df, tmp_df])
+    df.to_csv(csvFilename)
+
+
+def _getFileListFromURL(url, ext=".fits"):
+    page = urllib.request.urlopen(url).read()
+    soup = BeautifulSoup(page, 'html.parser')
+    return [os.path.join(url, node.get('href')) for node in soup.find_all('a') if node.get('href').endswith(ext)]
 
 
 def _deleteCache():

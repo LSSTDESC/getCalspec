@@ -1,6 +1,8 @@
 import unittest
 from getCalspec import is_calspec, Calspec
 from astropy.table import Table as astropyTable
+import astropy
+import os
 
 
 class GetCalspecTestCase(unittest.TestCase):
@@ -11,6 +13,7 @@ class GetCalspecTestCase(unittest.TestCase):
         self.assertFalse(is_calspec("NotACalspecStar"))
         self.assertFalse(is_calspec("Not A Calspec Star With Spaces"))
 
+    @astropy.config.set_temp_cache(os.path.join(os.path.abspath(os.path.dirname(__file__)), "data", "cache"))
     def test_Calspec(self):
         c = Calspec('eta dor')
         table = c.get_spectrum_table()
