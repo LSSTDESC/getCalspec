@@ -96,6 +96,8 @@ def clean_table(df):
             df.at[index, "Model"] = df.at[index, "Model"].replace("*", "")
         if isinstance(row["STIS"], str) and "*" in row["STIS"]:
             df.at[index, "STIS"] = df.at[index, "STIS"].replace("*", "")
+        if isinstance(row["Name"], str):
+            df.at[index, "Name"] = df.at[index, "Name"].lower()
 
 
 def rebuild_tables():
