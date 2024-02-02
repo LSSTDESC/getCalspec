@@ -254,8 +254,8 @@ class Calspec:
 
         Returns
         -------
-        table: astropy.table.Table
-            Astropy table containing all data for given Calspec star.
+        table: astropy.io.fits.FITS_rec
+            FITS table containing all data for given Calspec star.
 
         Examples
         --------
