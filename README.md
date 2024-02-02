@@ -1,7 +1,10 @@
+[![PyPI version](https://badge.fury.io/py/getCalspec.svg)](https://badge.fury.io/py/getCalspec)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # getCalspec
 Python package to download Calspec spectra.
 
-The main function query the Calspec table located in `calspec_data/calspec.csv` 
+The main function query the Calspec table located in `calspec_data/calspec.csv`
 to download spectrum FITS files from [STSC archive](https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html).
 
 Example:
@@ -21,7 +24,7 @@ from getCalspec.rebuild import rebuild_cache
 rebuild_cache()
 ```
 
-When the [STSC webpage](https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec) is updated, 
+When the [STSC webpage](https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec) is updated,
 it might be necessary to rebuild the `calspec_data/calspec.csv` table and the cache:
 ```
 from getCalspec.rebuild import rebuild_tables, rebuild_cache
