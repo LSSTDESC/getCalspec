@@ -176,6 +176,27 @@ class Calspec:
         return name
 
     def get_file_dataframe(self, type="stis"):
+        """Get the corresponding row from the history.csv table..
+
+        Parameters
+        ----------
+        type: str
+            Choose between STIS or model spectrum. Must be either 'stis'
+            or 'mod' (default: 'stis').
+
+        Returns
+        -------
+        row: pandas.DataFrame
+            The row from the history.csv file.
+
+        Examples
+        --------
+        >>> c = Calspec("2M0559-14")
+        >>> row = c.get_file_dataframe(type="stis")
+        >>> row
+
+
+        """
         if type.lower() not in ["stis", "mod"]:
             raise ValueError(f"Type argument must be either 'stis' or 'mod'. Got {type=}.")
         versions = getHistoryDataFrame()
@@ -213,10 +234,13 @@ class Calspec:
         >>> c.get_spectrum_fits_filename(type="mod", date="2021-03-20")
         '10lac_mod_003.fits'
         """
-        rows = self.get_file_dataframe(type=type)
         if date == "latest":
-            extension = rows["Extension"].iloc[-1]
+            if type == "mod":
+                extension = self.Model
+            elif type == "stis":
+                extension = self.STIS
         else:
+            rows = self.get_file_dataframe(type=type)
             dt = pd.to_datetime(date)
             if dt < min(rows["Date"]):
                 raise ValueError(
@@ -294,7 +318,7 @@ class Calspec:
 
         Examples
         --------
-        >>> c = Calspec("eta1 dor")
+        >>> c = Calspec("1812524")
         >>> dict = c.get_spectrum_numpy()
         >>> print(dict)   #doctest: +ELLIPSIS
         {'WAVELENGTH': <Quantity [...
