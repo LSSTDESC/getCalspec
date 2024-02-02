@@ -1,6 +1,6 @@
 import unittest
 from getCalspec import is_calspec, Calspec
-from astropy.table import Table as astropyTable
+from astropy.io.fits import FITS_rec
 import astropy
 import os
 
@@ -17,7 +17,7 @@ class GetCalspecTestCase(unittest.TestCase):
     def test_Calspec(self):
         c = Calspec('eta dor')
         table = c.get_spectrum_table()
-        self.assertIsInstance(table, astropyTable)
+        self.assertIsInstance(table, FITS_rec)
 
         data = c.get_spectrum_numpy()
         self.assertIsInstance(data, dict)
