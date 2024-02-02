@@ -5,7 +5,7 @@ import os
 import warnings
 from urllib.error import URLError
 from astropy import units as u
-from astropy.table import Table
+from astropy.io import fits
 from astropy.utils.data import download_file
 
 
@@ -261,15 +261,16 @@ class Calspec:
         --------
         >>> c = Calspec("eta1 dor")
         >>> t = c.get_spectrum_table()
-        >>> print(t)   #doctest: +ELLIPSIS
-        WAVELENGTH...
-        ANGSTROMS...
+        >>> print([col.name for col in t.columns])   #doctest: +ELLIPSIS
+        ['WAVELENGTH', 'FLUX', ...]
+        >>> print([col.unit for col in t.columns])   #doctest: +ELLIPSIS
+        ['ANGSTROMS', 'FLAM', ...]
 
         """
         output_file_name = self.download_spectrum_fits_filename(type=type, date=date)
         with warnings.catch_warnings():  # calspec fits files use non-astropy units everywhere
             warnings.filterwarnings("ignore", message='.*did not parse as fits unit')
-            t = Table.read(output_file_name)
+            t = fits.getdata(output_file_name)
         return t
 
     def get_spectrum_numpy(self, type="stis", date="latest"):
@@ -284,21 +285,24 @@ class Calspec:
         Examples
         --------
         >>> c = Calspec("eta1 dor")
-        >>> t = c.get_spectrum_numpy()
-        >>> print(t)   #doctest: +ELLIPSIS
+        >>> dict = c.get_spectrum_numpy()
+        >>> print(dict)   #doctest: +ELLIPSIS
         {'WAVELENGTH': <Quantity [...
 
         """
-        t = self.get_spectrum_table(type=type, date=date)
+        tab = self.get_spectrum_table(type=type, date=date)
         d = {}
-        for k in range(0, 4):
-            d[t.colnames[k]] = np.copy(t[t.colnames[k]][:])
-            if t[t.colnames[k]].unit == "ANGSTROMS":
-                d[t.colnames[k]] *= u.angstrom
-            elif t[t.colnames[k]].unit == "NANOMETERS":
-                d[t.colnames[k]] *= u.nanometer
-            elif t[t.colnames[k]].unit == "FLAM":
-                d[t.colnames[k]] *= u.erg / u.second / u.cm**2 / u.angstrom
+        ncols = len(tab.columns)
+        for k in range(ncols):
+            d[tab.columns[k].name] = np.copy(tab[tab.columns[k].name][:])
+            if tab.columns[k].unit == "ANGSTROMS":
+                d[tab.columns[k].name] *= u.angstrom
+            elif tab.columns[k].unit == "NANOMETERS":
+                d[tab.columns[k].name] *= u.nanometer
+            elif tab.columns[k].unit == "FLAM":
+                d[tab.columns[k].name] *= u.erg / u.second / u.cm ** 2 / u.angstrom
+            elif tab.columns[k].unit == "SEC":
+                d[tab.columns[k].name] *= u.second
         return d
 
     def plot_spectrum(self, xscale="log", yscale="log"):
