@@ -1,0 +1,10 @@
+numpy>1.15
+scipy
+matplotlib
+astropy>3.1
+coloredlogs
+recommonmark
+mistune==2.0.3
+docutils<1.0,>=0.16
+sphinx-mdinclude
+sphinx-rtd-theme
