@@ -9,13 +9,14 @@ from astropy.io import fits
 from astropy.utils.data import download_file
 
 
-__all__ = ['get_calspec_keys',
-           'is_calspec',
-           'Calspec',
-           '_getPackageDir',
-           'getCalspecDataFrame',
-           'CALSPEC_ARCHIVE'
-           ]
+__all__ = [
+    "get_calspec_keys",
+    "is_calspec",
+    "Calspec",
+    "_getPackageDir",
+    "getCalspecDataFrame",
+    "CALSPEC_ARCHIVE",
+]
 
 # do not use reference-atlases/cdbs/current_calspec as that only contains the
 # most recent version. Instead, use reference-atlases/cdbs/calspec/ as this
@@ -49,13 +50,13 @@ def _getPackageDir():
 
 def sanitizeString(label):
     """This method sanitizes the star label."""
-    return label.upper().replace(' ','')
+    return label.upper().replace(" ", "")
 
 
 def sanitizeDataFrame(df):
     """This method sanitizes the star label."""
     tmp_df = df.str.upper()
-    tmp_df = tmp_df.str.replace(' ', '')
+    tmp_df = tmp_df.str.replace(" ", "")
     return tmp_df
 
 
@@ -117,7 +118,7 @@ def is_calspec(star_label):
 
 
 class Calspec:
-    """ The Calspec class contains all properties from a Calspec star read from
+    """The Calspec class contains all properties from a Calspec star read from
     https://www.stsci.edu/hst/instrumentation/reference-data-for-calibration-and-tools/astronomical-catalogs/calspec.html
     loaded from its Simbad name.
 
@@ -170,8 +171,8 @@ class Calspec:
         downloading.
         """
         name = name.lower()
-        if name == 'sdss151421':
-            name = 'sdssj151421'
+        if name == "sdss151421":
+            name = "sdssj151421"
         return name
 
     def get_file_dataframe(self, type="stis"):
@@ -179,20 +180,25 @@ class Calspec:
             raise ValueError(f"Type argument must be either 'stis' or 'mod'. Got {type=}.")
         versions = getHistoryDataFrame()
         versions.sort_values("Filename")  # ensure table is ordered in time
-        rows = versions.loc[(versions['Name'] == self.Name) & (versions["Extension"].str.contains(type.lower()))]
+        rows = versions.loc[
+            (versions["Name"] == self.Name) & (versions["Extension"].str.contains(type.lower()))
+        ]
         rows.loc[:, "Date"] = pd.to_datetime(rows["Date"], format="mixed")
         return rows
 
     def get_spectrum_fits_filename(self, type="stis", date="latest"):
-        """Get the file name extension of type 'mod' or 'stis' at the closest date before the given date.
+        """Get the file name extension of type 'mod' or 'stis' at the
+        closest date before the given date.
 
         Parameters
         ----------
         type: str
-            Choose between STIS or model spectrum. Must be either 'stis' or 'mod' (default: 'stis').
+            Choose between STIS or model spectrum. Must be either 'stis'
+            or 'mod' (default: 'stis').
         date: str
-            The most recent file before the given date will be returned (default: 'latest'). One can use all datetime
-            formats understood by pandas `to_datetime()` method.
+            The most recent file before the given date will be returned
+            (default: 'latest'). One can use all datetime formats understood
+            by pandas `to_datetime()` method.
 
         Returns
         -------
@@ -208,15 +214,17 @@ class Calspec:
         '10lac_mod_003.fits'
         """
         rows = self.get_file_dataframe(type=type)
-        if date == 'latest':
-            extension = rows['Extension'].iloc[-1]
+        if date == "latest":
+            extension = rows["Extension"].iloc[-1]
         else:
             dt = pd.to_datetime(date)
             if dt < min(rows["Date"]):
-                raise ValueError(f"Given {date=} is lower than the oldest available date {min(rows['Date'])=}.")
+                raise ValueError(
+                    f"Given {date=} is lower than the oldest available date {min(rows['Date'])=}."
+                )
             latest_row_before_date = rows.loc[max(rows[rows["Date"] <= dt].index)]
-            extension = latest_row_before_date['Extension']
-        spectrum_file_name = self._sanitizeName(self.Name) + extension.replace('*', '') + ".fits"
+            extension = latest_row_before_date["Extension"]
+        spectrum_file_name = self._sanitizeName(self.Name) + extension.replace("*", "") + ".fits"
         return spectrum_file_name
 
     def download_spectrum_fits_filename(self, type="stis", date="latest"):
@@ -225,7 +233,8 @@ class Calspec:
         Parameters
         ----------
         type: str
-            Choose between STIS or model spectrum. Must be either 'stis' or 'mod' (default: 'stis').
+            Choose between STIS or model spectrum. Must be either 'stis'
+            or 'mod' (default: 'stis').
 
         Returns
         -------
@@ -237,7 +246,8 @@ class Calspec:
         >>> c = Calspec("eta1 dor")
         >>> c.download_spectrum_fits_filename()  #doctest: +ELLIPSIS
         '...astropy/cache/download/url/...'
-        >>> c.download_spectrum_fits_filename(type="mod", date="2021-12-11")  #doctest: +ELLIPSIS
+        >>> c.download_spectrum_fits_filename(type="mod",
+        ... date="2021-12-11")  #doctest: +ELLIPSIS
         '...astropy/cache/download/url/...'
 
         """
@@ -269,7 +279,7 @@ class Calspec:
         """
         output_file_name = self.download_spectrum_fits_filename(type=type, date=date)
         with warnings.catch_warnings():  # calspec fits files use non-astropy units everywhere
-            warnings.filterwarnings("ignore", message='.*did not parse as fits unit')
+            warnings.filterwarnings("ignore", message=".*did not parse as fits unit")
             t = fits.getdata(output_file_name)
         return t
 
@@ -300,7 +310,7 @@ class Calspec:
             elif tab.columns[k].unit == "NANOMETERS":
                 d[tab.columns[k].name] *= u.nanometer
             elif tab.columns[k].unit == "FLAM":
-                d[tab.columns[k].name] *= u.erg / u.second / u.cm ** 2 / u.angstrom
+                d[tab.columns[k].name] *= u.erg / u.second / u.cm**2 / u.angstrom
             elif tab.columns[k].unit == "SEC":
                 d[tab.columns[k].name] *= u.second
         return d
