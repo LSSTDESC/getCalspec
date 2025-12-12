@@ -56,6 +56,8 @@ def add_alt_star_name(df):
     for i, row in df.iterrows():
         if row["Star name"] == "ETA1 DOR":
             df.at[i, "Alt Star name"] = "ETA DOR"
+        if row["Star name"] == "ETA UMA":
+            df.at[i, "Alt Star name"] = "Alkaid"
     for i, row in df.iterrows():
         all_names = None
         for name in name_columns:
