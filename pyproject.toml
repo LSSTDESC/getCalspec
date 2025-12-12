@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "getCalspec"
+dynamic = ["version"]
+description = "Python package to download Calspec spectra"
+authors = [
+    {name = "J. Neveu", email = "jeremy.neveu@universite-paris-saclay.fr"}
+]
+readme = "README.md"
+license = {text = "BSD-3-Clause"}
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+dependencies = [
+    "numpy>1.15",
+    "matplotlib>3.1",
+    "pandas",
+    "astropy-base",
+    "astroquery",
+    "lxml",
+    "beautifulsoup4",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-flake8",
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
+
+[project.urls]
+Homepage = "https://github.com/LSSTDESC/getCalspec"
+Documentation = "https://getcalspec.readthedocs.io"
+Repository = "https://github.com/LSSTDESC/getCalspec"
+
+[tool.setuptools]
+packages = ["getCalspec"]
+
+[tool.setuptools.dynamic]
+version = {attr = "getCalspec._version.__version__"}
+
+[tool.setuptools.package-data]
+getCalspec = ["../calspec_data/calspec.csv", "../calspec_data/history.csv"]
+
+[tool.flake8]
+max-line-length = 110
+max-doc-length = 79
+ignore = ["E133", "E226", "E228", "N802", "N803", "N806", "N812", "N813", "N815", "N816", "W504"]
+exclude = [
+    "bin",
+    "doc",
+    "**/__init__.py",
+    "**/*version.py",
+    "tests/.tests",
+]
