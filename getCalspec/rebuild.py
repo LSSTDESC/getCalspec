@@ -4,6 +4,7 @@ import glob
 import pandas as pd
 import warnings
 import logging
+from io import StringIO
 from astropy.utils.data import download_file
 from astropy.io import fits
 from bs4 import BeautifulSoup
@@ -34,16 +35,23 @@ def add_astroquery_id(df):
         warnings.simplefilter("ignore")
         for i, row in df.iterrows():
             simbad = Simbad.query_object(row["Star name"], wildcard=False)
-            if simbad is None:
+            if simbad is None or len(simbad) == 0:
                 simbad = Simbad.query_object(row["Star name"].lower(), wildcard=False)
-            if simbad is None and row["Simbad Name"] != "":
+            if (
+                (simbad is None or len(simbad) == 0)
+                and pd.notna(row["Simbad Name"])
+                and row["Simbad Name"] != ""
+            ):
                 simbad = Simbad.query_object(row["Simbad Name"])
-            if simbad is None and row["Name"] != "":
+            if (simbad is None or len(simbad) == 0) and pd.notna(row["Name"]) and row["Name"] != "":
                 simbad = Simbad.query_object(row["Name"])
-            if simbad is None and "NGC6681" in row["Star name"]:
+            if (simbad is None or len(simbad) == 0) and "NGC6681" in row["Star name"]:
                 simbad = Simbad.query_object("NGC6681")
-            if simbad is not None:
-                names.append(simbad["MAIN_ID"][0].upper())
+            id_key = "MAIN_ID"
+            if "main_id" in simbad.colnames:
+                id_key = "main_id"
+            if simbad is not None and len(simbad) > 0:
+                names.append(simbad[id_key][0].upper())
             else:
                 names.append("")
     df["Astroquery Name"] = names
@@ -61,13 +69,22 @@ def add_alt_star_name(df):
     for i, row in df.iterrows():
         all_names = None
         for name in name_columns:
+            if pd.isna(row[name]) or row[name] == "":
+                continue
             all_names = Simbad.query_objectids(row[name])
             if all_names is not None and len(all_names) > 0:
                 break
         if all_names is not None:
-            for name in list(all_names["ID"]):
+            id_key = "ID"
+            if "id" in all_names.colnames:
+                id_key = "id"
+            for name in list(all_names[id_key]):
                 if name.startswith("HD"):
                     df.at[i, "HD name"] = name.replace(" ", "")
+                if name.startswith("Gaia DR2"):
+                    df.at[i, "source_id"] = str(name.split(" ")[-1])
+                if name.startswith("Gaia DR3"):
+                    df.at[i, "source_id"] = str(name.split(" ")[-1])
 
 
 def clean_table(df):
@@ -87,7 +104,8 @@ def clean_table(df):
         if " " in col:
             df.rename(columns={col: col.replace(" ", "_")}, inplace=True)
     df.set_index("Star_name", inplace=True)
-    df.drop(index="[1]", inplace=True)
+    if "[1]" in df.index:
+        df.drop(index="[1]", inplace=True)
     df.reset_index(drop=False, inplace=True)
     # remove _stis from Model column and put it in STIS column
     for index, row in df.iterrows():
@@ -102,7 +120,7 @@ def clean_table(df):
             df.at[index, "Name"] = df.at[index, "Name"].lower()
 
 
-def rebuild_tables():
+def rebuild_tables(gaia_data_release="DR3"):
     """Rebuild calspec.csv table.
 
     Examples
@@ -129,8 +147,9 @@ def rebuild_tables():
     tables = []
     # convert to pd.DataFrame
     for web_table in web_tables:
-        tables.append(pd.read_html(str(web_table))[0])
+        tables.append(pd.read_html(StringIO(str(web_table)))[0])
     # format tables
+    clean_tables = []
     for table in tables:
         if isinstance(table.columns, pd.MultiIndex):
             table.columns = table.columns.droplevel(1)  # drop multiindex columns
@@ -138,11 +157,14 @@ def rebuild_tables():
         # table.set_index("Star name", inplace=True)
         if r"[1]" in table.index:
             table = table.drop(index=r"[1]")
+        if r"[1]" in table["Star name"].values:
+            table = table[table["Star name"] != r"[1]"]
+        clean_tables.append(table)
 
-    df = tables[0]
-    if len(tables) > 1:
-        df = pd.concat([df, tables[1]])
-        df = pd.merge(df, tables[2], on="Star name", how="left")
+    df = clean_tables[0]
+    if len(clean_tables) > 1:
+        df = pd.concat([df, clean_tables[1]])
+        df = pd.merge(df, clean_tables[2], on="Star name", how="left")
 
     add_astroquery_id(df)
     add_alt_star_name(df)
