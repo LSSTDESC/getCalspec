@@ -20,6 +20,17 @@ c.get_spectrum_numpy(type="mod", date="2010-12-11")  # download and return a dic
 c.plot_spectrum()  # download and plot the spectrum
 ```
 
+To get Calspec table and the list of available Calspec names:
+```
+from getCalspec.getCalspec import getCalspecDataFrame
+
+df = getCalspecDataFrame()
+print(df.Name.values)
+# Gaia IDs
+print(df.source_id.values)
+```
+
+
 To get all Calspec data in one time in cache, write:
 ```
 from getCalspec.rebuild import rebuild_cache
