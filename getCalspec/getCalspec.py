@@ -29,7 +29,14 @@ CALSPEC_ARCHIVE = r"https://archive.stsci.edu/hlsps/reference-atlases/cdbs/calsp
 def getCalspecDataFrame():
     dirname = _getPackageDir()
     filename = os.path.join(dirname, "../calspec_data/calspec.csv")
-    df = pd.read_csv(filename)
+
+    # First read the first line to get column names
+    column_names = pd.read_csv(filename, nrows=0).columns.tolist()
+    dtypes = {col: "str" for col in column_names}
+    if "source_id" in dtypes:
+        dtypes["source_id"] = "Int64"  # Int64 (nullable) instead of int64 to handle NA values
+
+    df = pd.read_csv(filename, dtype=dtypes, index_col=0)
     return df
 
 
