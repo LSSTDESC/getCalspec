@@ -34,18 +34,18 @@ def add_astroquery_id(df):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         for i, row in df.iterrows():
-            simbad = Simbad.query_object(row["Star name"], wildcard=False)
+            simbad = Simbad.query_object(row["Star_name"], wildcard=False)
             if simbad is None or len(simbad) == 0:
-                simbad = Simbad.query_object(row["Star name"].lower(), wildcard=False)
+                simbad = Simbad.query_object(row["Star_name"].lower(), wildcard=False)
             if (
                 (simbad is None or len(simbad) == 0)
-                and pd.notna(row["Simbad Name"])
-                and row["Simbad Name"] != ""
+                and pd.notna(row["Simbad_Name"])
+                and row["Simbad_Name"] != ""
             ):
-                simbad = Simbad.query_object(row["Simbad Name"])
+                simbad = Simbad.query_object(row["Simbad_Name"])
             if (simbad is None or len(simbad) == 0) and pd.notna(row["Name"]) and row["Name"] != "":
                 simbad = Simbad.query_object(row["Name"])
-            if (simbad is None or len(simbad) == 0) and "NGC6681" in row["Star name"]:
+            if (simbad is None or len(simbad) == 0) and "NGC6681" in row["Star_name"]:
                 simbad = Simbad.query_object("NGC6681")
             id_key = "MAIN_ID"
             if "main_id" in simbad.colnames:
@@ -54,7 +54,7 @@ def add_astroquery_id(df):
                 names.append(simbad[id_key][0].upper())
             else:
                 names.append("")
-    df["Astroquery Name"] = names
+    df["Astroquery_Name"] = names
 
 
 def add_alt_star_name(df):
@@ -62,10 +62,10 @@ def add_alt_star_name(df):
     for each star (row), and removes spaces from HD stars."""
     name_columns = [name for name in df.columns if "name" in name.lower()]
     for i, row in df.iterrows():
-        if row["Star name"] == "ETA1 DOR":
-            df.at[i, "Alt Star name"] = "ETA DOR"
-        if row["Star name"] == "ETA UMA":
-            df.at[i, "Alt Star name"] = "Alkaid"
+        if row["Star_name"] == "ETA1 DOR":
+            df.at[i, "Alt_Star_name"] = "ETA DOR"
+        if row["Star_name"] == "ETA UMA":
+            df.at[i, "Alt_Star_name"] = "Alkaid"
     for i, row in df.iterrows():
         all_names = None
         for name in name_columns:
@@ -80,7 +80,7 @@ def add_alt_star_name(df):
                 id_key = "id"
             for name in list(all_names[id_key]):
                 if name.startswith("HD"):
-                    df.at[i, "HD name"] = name.replace(" ", "")
+                    df.at[i, "HD_name"] = name.replace(" ", "")
                 if name.startswith("Gaia DR2"):
                     df.at[i, "source_id"] = str(name.split(" ")[-1])
                 if name.startswith("Gaia DR3"):
@@ -93,7 +93,7 @@ def clean_table(df):
             df.rename(columns={col: col.replace("*", "")}, inplace=True)
     for col in df.columns:
         if "mas/yr" in col:
-            df.rename(columns={col: col.replace(" (mas/yr)", "")}, inplace=True)
+            df.rename(columns={col: col.replace("_(mas/yr)", "")}, inplace=True)
     for col in df.columns:
         if "2000" in col:
             df.rename(columns={col: col.replace("_(2000)", "_J2000")}, inplace=True)
@@ -158,19 +158,19 @@ def rebuild_tables(gaia_data_release="DR3"):
             table.columns = [
                 col[0] if "Unnamed" in col[1] else "_".join(col).strip("_") for col in table.columns.values
             ]
-        table.columns = [col.replace("*", "") for col in table.columns]
-        table.rename(columns={"Star Name": "Star name"}, inplace=True)
+        table.columns = [col.replace("*", "").replace(" ", "_") for col in table.columns]
+        table.rename(columns={"Star_Name": "Star_name"}, inplace=True)
         # table.set_index("Star name", inplace=True)
         if r"[1]" in table.index:
             table = table.drop(index=r"[1]")
-        if r"[1]" in table["Star name"].values:
-            table = table[table["Star name"] != r"[1]"]
+        if r"[1]" in table["Star_name"].values:
+            table = table[table["Star_name"] != r"[1]"]
         clean_tables.append(table)
 
     df = clean_tables[0]
     if len(clean_tables) > 1:
         df = pd.concat([df, clean_tables[1]])
-        df = pd.merge(df, clean_tables[2], on="Star name", how="left")
+        df = pd.merge(df, clean_tables[2], on="Star_name", how="left")
 
     add_astroquery_id(df)
     add_alt_star_name(df)
