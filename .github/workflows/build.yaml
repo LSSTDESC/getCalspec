@@ -33,6 +33,11 @@ jobs:
         run: |
           pip list -v
 
+      - name: Check CSV columns
+        shell: bash -l {0}
+        run: |
+          head -1 calspec_data/calspec.csv
+
       - name: Run pytest
         shell: bash -l {0}
         run: |
