@@ -94,11 +94,13 @@ def get_calspec_keys(star_label):
     label = sanitizeString(star_label)
     df = getCalspecDataFrame()
     name_columns = [name for name in df.columns if "_name" in name.lower()]
+    print(name_columns)
     if len(name_columns) > 0:
         keys = pd.Series([False] * len(df))
         for name in name_columns:
             tmp_df = sanitizeDataFrame(df[name])
             keys = keys | (tmp_df == label)
+        print(keys)
         return keys
     else:
         raise KeyError("No column label with _name in calspec.csv")
@@ -124,7 +126,7 @@ def is_calspec(star_label):
     >>> is_calspec("eta dor")
     True
     """
-    return np.any(get_calspec_keys(sanitizeString(star_label)))
+    return bool(np.any(get_calspec_keys(sanitizeString(star_label))))
 
 
 class Calspec:
