@@ -1,4 +1,4 @@
-,Star_name,Sp_T,G,V,B_V,Name,Model,STIS,Var_(%),RA_J2000,Decl_J2000,Vr,PM_RA,PM_Decl,Simbad_Name,Alt Simbad_Name,Astroquery_Name,Alt_Star_name,source_id,HD_name
+,Star_name,Sp_T,G,V,B_V,Name,Model,STIS,Var_(%),RA_J2000,Decl_J2000,Vr,PM_RA,PM_Decl,Simbad_Name,Alt_Simbad_Name,Astroquery_Name,Alt_Star_name,source_id,HD_name
 0,109 VIR,A0III,,3.73,-0.01,109vir,_mod_005,_stis_005,,14 46 14.925,+01 53 34.38,-6.1,-114.03,-22.13,HD130109,,* 109 VIR,,3655377057091401856,HD130109
 1,10 LAC,O9V,,4.88,-0.21,10lac,_mod_006,_stis_008,<0.23,22 39 15.679,+39 03 00.97,-10.0,-0.32,-5.46,,,*  10 LAC,,1908095850396090880,HD214680
 2,16 CYG B,G3V,,6.20,0.66,16cygb,_mod_005,_stis_005,<0.21,19 41 51.973,+50 31 03.09,-27.7,-134.79,-162.49,HD186427,,*  16 CYG B,,2135550755683407232,HD186427

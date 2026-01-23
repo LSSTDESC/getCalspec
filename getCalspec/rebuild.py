@@ -88,24 +88,30 @@ def add_alt_star_name(df):
 
 
 def clean_table(df):
+    # Build a mapping of all column renames
+    rename_map = {}
     for col in df.columns:
-        if "*" in col:
-            df.rename(columns={col: col.replace("*", "")}, inplace=True)
-    for col in df.columns:
-        if "mas/yr" in col:
-            df.rename(columns={col: col.replace("_(mas/yr)", "")}, inplace=True)
-    for col in df.columns:
-        if "2000" in col:
-            df.rename(columns={col: col.replace("_(2000)", "_J2000")}, inplace=True)
-    for col in df.columns:
-        if "." in col:
-            df.rename(columns={col: col.replace(".", "")}, inplace=True)
-    for col in df.columns:
-        if "-" in col:
-            df.rename(columns={col: col.replace("-", "_")}, inplace=True)
-    for col in df.columns:
-        if " " in col:
-            df.rename(columns={col: col.replace(" ", "_")}, inplace=True)
+        new_col = col
+        if "*" in new_col:
+            new_col = new_col.replace("*", "")
+        if "mas/yr" in new_col:
+            new_col = new_col.replace("_(mas/yr)", "")
+        if "2000" in new_col:
+            new_col = new_col.replace("_(2000)", "_J2000")
+        if "." in new_col:
+            new_col = new_col.replace(".", "")
+        if "-" in new_col:
+            new_col = new_col.replace("-", "_")
+        # Replace both regular space and non-breaking space (\\xa0)
+        if " " in new_col or "\xa0" in new_col:
+            new_col = new_col.replace(" ", "_").replace("\xa0", "_")
+        if new_col != col:
+            rename_map[col] = new_col
+
+    # Apply all renames at once
+    if rename_map:
+        df.rename(columns=rename_map, inplace=True)
+
     df.set_index("Star_name", inplace=True)
     if "[1]" in df.index:
         df.drop(index="[1]", inplace=True)
