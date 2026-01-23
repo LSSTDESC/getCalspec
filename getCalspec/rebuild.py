@@ -95,6 +95,9 @@ def clean_table(df):
         if "mas/yr" in col:
             df.rename(columns={col: col.replace(" (mas/yr)", "")}, inplace=True)
     for col in df.columns:
+        if "2000" in col:
+            df.rename(columns={col: col.replace("_(2000)", "_J2000")}, inplace=True)
+    for col in df.columns:
         if "." in col:
             df.rename(columns={col: col.replace(".", "")}, inplace=True)
     for col in df.columns:
@@ -152,7 +155,10 @@ def rebuild_tables(gaia_data_release="DR3"):
     clean_tables = []
     for table in tables:
         if isinstance(table.columns, pd.MultiIndex):
-            table.columns = table.columns.droplevel(1)  # drop multiindex columns
+            table.columns = [
+                col[0] if "Unnamed" in col[1] else "_".join(col).strip("_") for col in table.columns.values
+            ]
+        table.columns = [col.replace("*", "") for col in table.columns]
         table.rename(columns={"Star Name": "Star name"}, inplace=True)
         # table.set_index("Star name", inplace=True)
         if r"[1]" in table.index:

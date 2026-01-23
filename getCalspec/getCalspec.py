@@ -37,6 +37,9 @@ def getCalspecDataFrame():
         dtypes["source_id"] = "Int64"  # Int64 (nullable) instead of int64 to handle NA values
 
     df = pd.read_csv(filename, dtype=dtypes, index_col=0)
+    for col in df.columns:
+        if dtypes[col] == "str":
+            df[col] = df[col].fillna("").astype(str)
     return df
 
 
@@ -172,6 +175,9 @@ class Calspec:
 
     def __str__(self):
         return self.Name
+
+    def __getitem__(self, key):
+        return self.query[key].values[0]
 
     def _sanitizeName(self, name):
         """Special casing for cleaning up names in the table for use in
