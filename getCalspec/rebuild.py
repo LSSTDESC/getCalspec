@@ -164,7 +164,7 @@ def rebuild_tables(gaia_data_release="DR3"):
             table.columns = [
                 col[0] if "Unnamed" in col[1] else "_".join(col).strip("_") for col in table.columns.values
             ]
-        table.columns = [col.replace("*", "").replace(" ", "_") for col in table.columns]
+        table.columns = [col.replace("*", "").replace(" ", "_").replace("\xa0", "_") for col in table.columns]
         table.rename(columns={"Star_Name": "Star_name"}, inplace=True)
         # table.set_index("Star name", inplace=True)
         if r"[1]" in table.index:
