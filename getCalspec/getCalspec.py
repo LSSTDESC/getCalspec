@@ -93,24 +93,14 @@ def get_calspec_keys(star_label):
     """
     label = sanitizeString(star_label)
     df = getCalspecDataFrame()
-    print(f"DEBUG get_calspec_keys: df.shape = {df.shape}")
-    print(f"DEBUG get_calspec_keys: df.index = {df.index[:5]}... (showing first 5)")
     name_columns = [name for name in df.columns if "_name" in name.lower()]
     if len(name_columns) > 0:
         keys = pd.Series([False] * len(df), index=df.index)
-        print(f"DEBUG initial keys.shape = {keys.shape}, keys.index = {keys.index[:5]}... (showing first 5)")
         for name in name_columns:
             tmp_df = sanitizeDataFrame(df[name])
-            print(
-                f"DEBUG column {name}: tmp_df.shape = {tmp_df.shape}, tmp_df.index = {tmp_df.index[:5]}... "
-            )
             comparison = tmp_df == label
-            print(
-                f"DEBUG comparison.shape = {comparison.shape}, comparison.index = {comparison.index[:5]}... "
-            )
-            keys = keys | comparison
-            print(f"DEBUG after OR: keys.shape = {keys.shape}, keys.index = {keys.index[:5]}... ")
-        print(keys)
+            # Use .values to avoid index alignment issues in pandas 3.0
+            keys = keys | comparison.values
         return keys
     else:
         raise KeyError("No column label with _name in calspec.csv")
