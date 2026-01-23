@@ -37,6 +37,8 @@ jobs:
         shell: bash -l {0}
         run: |
           head -1 calspec_data/calspec.csv
+          echo "Number of lines in CSV:"
+          wc -l calspec_data/calspec.csv
 
       - name: Run pytest
         shell: bash -l {0}
