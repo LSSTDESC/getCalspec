@@ -39,6 +39,10 @@ jobs:
           head -1 calspec_data/calspec.csv
           echo "Number of lines in CSV:"
           wc -l calspec_data/calspec.csv
+          echo "Checking for duplicate lines:"
+          tail -5 calspec_data/calspec.csv
+          echo "---"
+          python -c "import pandas as pd; df = pd.read_csv('calspec_data/calspec.csv', index_col=0); print(f'DataFrame length: {len(df)}'); print(f'Unique Star_name: {df.Star_name.nunique()}'); print(f'Duplicates: {df.duplicated().sum()}'); print(df.tail(10)[['Star_name']])"
 
       - name: Run pytest
         shell: bash -l {0}
